@@ -3,7 +3,15 @@ import java.awt.*;
 
 public class UI extends JFrame {
 
+    private Patient patient;
+
+    private VitalSignPanel tempChart;
+    private VitalSignPanel hrChart;
+    private VitalSignPanel rrChart;
+
     public void initialise(){
+        patient = new Patient(1, "John Smith", 35);
+
         JFrame frame = new JFrame("Patient Monitor");
         frame.setSize(900,500);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -22,10 +30,10 @@ public class UI extends JFrame {
         mainPanel.add(vitalSignsPanel,BorderLayout.CENTER);
         mainPanel.add(ECGPanel,BorderLayout.SOUTH);
 
-        JPanel bodyTemperature = new JPanel();
-        JPanel heartRate =  new JPanel();
-        JPanel respiratoryRate = new JPanel();
-        JPanel bloodPressure = new JPanel();
+        JPanel bodyTemperature = new JPanel(new BorderLayout());
+        JPanel heartRate =  new JPanel(new BorderLayout());
+        JPanel respiratoryRate = new JPanel(new BorderLayout());
+        JPanel bloodPressure = new JPanel(new BorderLayout());
 
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
         bodyTemperature.setBorder(BorderFactory.createTitledBorder("Body Temperature"));
@@ -40,7 +48,29 @@ public class UI extends JFrame {
         vitalSignsPanel.add(respiratoryRate);
         vitalSignsPanel.add(bloodPressure);
 
+        tempChart = new VitalSignPanel("Temperature (°C)");
+        hrChart   = new VitalSignPanel("Heart Rate (bpm)");
+        rrChart   = new VitalSignPanel("Resp Rate (breaths/min)");
+
+        bodyTemperature.add(tempChart, BorderLayout.CENTER);
+        heartRate.add(hrChart, BorderLayout.CENTER);
+        respiratoryRate.add(rrChart, BorderLayout.CENTER);
+
         frame.setVisible(true);
+        startLiveUpdates();
+    }
+
+    private void startLiveUpdates() {
+
+        Timer timer = new Timer(1000, e -> {
+            patient.updateVitals();
+
+            tempChart.updateData(patient.getTemperatureHistory());
+            hrChart.updateData(patient.getHeartRateHistory());
+            rrChart.updateData(patient.getRespRateHistory());
+        });
+
+        timer.start();
     }
 }
 
