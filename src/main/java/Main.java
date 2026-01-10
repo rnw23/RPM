@@ -1,6 +1,23 @@
-import Alarm.AlarmLevel;
-import javax.swing.*;
+/* ----- testing Daily Report ----- */
+public class Main {
 
+    public static void main(String[] args) throws Exception {
+
+        Patient p = new Patient(1, "John Smith", 35);
+
+        for (int i = 0; i < 60; i++) { // 24 minutes
+            p.updateVitals();
+            Thread.sleep(1000);
+        }
+
+        DailyReport report = new DailyReport(p);
+        report.exportExcel("DailyReport_Patient_1.xlsx");
+
+        System.out.println("Daily report generated successfully.");
+    }
+}
+
+/* ----- testing UI + Patient -----
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
@@ -17,7 +34,9 @@ public class Main {
         }
     }
 }
-/*
+ */
+
+/* ----- testing Listener -----
     public static void main(String[] args) {
 
         VitalSignsGenerator simulator = new VitalSignsGenerator();
