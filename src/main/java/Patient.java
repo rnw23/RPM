@@ -45,17 +45,6 @@ public class Patient extends VitalSignsGenerator {
 
     public int getAge() { return age; }
 
-    public HeartRate getHr() { return HeartRateHistory.get(HeartRateHistory.size() - 1); }
-
-    public BloodPressure getBp(){ return BloodPressureHistory.get(BloodPressureHistory.size() - 1); }
-
-    public RespRate getRR(){ return RespRateHistory.get(RespRateHistory.size() - 1); }
-
-    public Temperature getTemp(){ return TemperatureHistory.get(TemperatureHistory.size() - 1); }
-
-    public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
-
-
     public ArrayList<ECG> getECGHistory() {
         return ECGHistory;
     }
@@ -76,6 +65,54 @@ public class Patient extends VitalSignsGenerator {
         return TemperatureHistory;
     }
 
+    private <T> ArrayList<T> genArray(ArrayList<T> history, int sec) {
+        ArrayList<T> result = new ArrayList<>();
+
+        if (history == null || history.isEmpty() || sec <= 0) {
+            return result;
+        }
+
+        int size = history.size();
+        int startIndex = Math.max(0, size - sec);
+
+        for (int i = startIndex; i < size; i++) {
+            result.add(history.get(i));
+        }
+
+        return result;
+    }
+
+    public ArrayList<HeartRate> getHrArr(int sec) {
+        return genArray(HeartRateHistory, sec);
+    }
+
+    public ArrayList<BloodPressure> getBpArr(int sec) {
+        return genArray(BloodPressureHistory, sec);
+    }
+
+    public ArrayList<RespRate> getRrArr(int sec) {
+        return genArray(RespRateHistory, sec);
+    }
+
+    public ArrayList<Temperature> getTempArr(int sec) {
+        return genArray(TemperatureHistory, sec);
+    }
+
+    public ArrayList<ECG> getECGArr(int sec) {
+        return genArray(ECGHistory, sec);
+    }
+
+    public HeartRate getHr(){ return HeartRateHistory.get(HeartRateHistory.size() - 1); }
+
+    public BloodPressure getBp(){ return BloodPressureHistory.get(BloodPressureHistory.size() - 1); }
+
+    public RespRate getRr(){ return RespRateHistory.get(RespRateHistory.size() - 1); }
+
+    public Temperature getTemp(){ return TemperatureHistory.get(TemperatureHistory.size() - 1); }
+
+    public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
+
+
     /* ----- Potential Display in the UI ----- */
     public String PatientDisplay() {
         return "Patient\n"
@@ -84,7 +121,7 @@ public class Patient extends VitalSignsGenerator {
                 + "Age: " + getAge() + " years old\n"
                 + "Heart Rate: " + getHr().getValue() + " bpm\n"
                 + "Blood Pressure: " + getBp().getValue() + "\n"
-                + "Resp Rate: " + getRR().getValue() + " breaths/min\n"
+                + "Resp Rate: " + getRr().getValue() + " breaths/min\n"
                 + "Temperature: " + String.format("%.2f",getTemp().getValue()) + " °C\n"
                 + "ECG: " + String.format("%.2f",getECG().getValue()) + "\n";
     }

@@ -15,8 +15,6 @@ public class Main {
             System.out.println(p.PatientDisplay());
             Thread.sleep(1000);
         }
-
-
     }
 }
 /*
