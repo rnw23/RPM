@@ -1,5 +1,4 @@
 import Alarm.AlarmLevel;
-
 import javax.swing.*;
 
 public class Main {
@@ -30,4 +29,3 @@ public class Main {
         simulator.start();
     }
  */
-}
