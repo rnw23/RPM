@@ -1,3 +1,5 @@
+import Alarm.AlarmLevel;
+
 import javax.swing.*;
 public class Main {
 
@@ -5,8 +7,8 @@ public class Main {
 
         VitalSignsGenerator simulator = new VitalSignsGenerator();
 
-        AlarmEngine alarm = new AlarmEngine();
-        DashboardUI ui = new DashboardUI();
+        AlarmLevel alarm = new AlarmLevel();
+        UI ui = new UI();
         DatabaseRepository repo = new DatabaseRepository();
 
         simulator.addListener(alarm);

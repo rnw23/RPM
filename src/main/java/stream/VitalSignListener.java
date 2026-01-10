@@ -1,8 +1,6 @@
+package stream;
 
-// rpm/stream/VitalSignListener.java
-package rpm.stream;
-
-import rpm.domain.VitalSign;
+import AllVitalSigns.VitalSign;
 
 public interface VitalSignListener {
     void onVitalSignReceived(VitalSign vitalSign);

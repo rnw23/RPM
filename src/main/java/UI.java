@@ -43,3 +43,17 @@ public class UI extends JFrame {
         frame.setVisible(true);
     }
 }
+
+/* ----- Potential Usage -----
+import javax.swing.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new UI().initialise();
+        });
+    }
+}
+
+*/
