@@ -9,4 +9,8 @@ public class ECG {
         this.voltage = voltage;
         this.dateTime = LocalDateTime.now();
     }
+
+    public double getValue() {
+        return voltage;
+    }
 }
