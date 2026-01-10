@@ -55,6 +55,27 @@ public class Patient extends VitalSignsGenerator {
 
     public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
 
+
+    public ArrayList<ECG> getECGHistory() {
+        return ECGHistory;
+    }
+
+    public ArrayList<BloodPressure> getBloodPressureHistory() {
+        return BloodPressureHistory;
+    }
+
+    public ArrayList<HeartRate> getHeartRateHistory() {
+        return HeartRateHistory;
+    }
+
+    public ArrayList<RespRate> getRespRateHistory() {
+        return RespRateHistory;
+    }
+
+    public ArrayList<Temperature> getTemperatureHistory() {
+        return TemperatureHistory;
+    }
+
     /* ----- Potential Display in the UI ----- */
     public String PatientDisplay() {
         return "Patient\n"

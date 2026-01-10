@@ -9,7 +9,7 @@ public class VitalSignsGenerator {
      * Typical adult resting range: 60–100 bpm
      */
     public static double generateHeartRate() {
-        return randomDoubleInRange(30, 120);
+        return (double)randomIntInRange(30, 120);
     }
 
     /** * Generates a random systolic and diastolic value
