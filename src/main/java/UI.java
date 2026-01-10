@@ -6,20 +6,20 @@ import Alarm.AlarmManager;
 public class UI extends JFrame {
 
     private Patient patient;
+    private Timer timer;
 
     private VitalSignPanel tempChart;
     private VitalSignPanel hrChart;
     private VitalSignPanel rrChart;
     private BloodPressurePanel bpChart;
 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    // >>>【新增 3】把 4 个外层 panel 变成“成员变量”，这样 Timer 里才能改背景色
+    //new added
     private JPanel bodyTemperaturePanel;
     private JPanel heartRatePanel;
     private JPanel respiratoryRatePanel;
     private JPanel bloodPressurePanel;
 
-    // >>>【新增 4】报警管理器（负责：改背景色 + 弹窗/声音/邮件冷却）
+    //alarm manager
     private final AlarmManager alarmManager = new AlarmManager();
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -46,19 +46,17 @@ public class UI extends JFrame {
         mainPanel.add(vitalSignsPanel,BorderLayout.CENTER);
         mainPanel.add(ECGPanel,BorderLayout.SOUTH);
 
-        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        // >>>【改动点 1】这 4 个 panel 不要用局部变量了，改成上面那 4 个成员变量
+        //member virable changed
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel =  new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
         bloodPressurePanel = new JPanel(new BorderLayout());
 
-        // >>>【新增】让背景色能生效（Swing 默认有些容器不一定显示背景）
+        //background color
         bodyTemperaturePanel.setOpaque(true);
         heartRatePanel.setOpaque(true);
         respiratoryRatePanel.setOpaque(true);
         bloodPressurePanel.setOpaque(true);
-        // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
@@ -91,13 +89,22 @@ public class UI extends JFrame {
         rrChart.setOpaque(false);
         bpChart.setOpaque(false);
 
+        // >>> ADD: when closing the main window, stop updates + close all alarm dialogs
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                if (timer != null) timer.stop();          // stop generating alarms
+                alarmManager.closeAllDialogs();           // close any open alarm popups
+            }
+        });
+
         frame.setVisible(true);
         startLiveUpdates();
     }
 
     private void startLiveUpdates() {
 
-        Timer timer = new Timer(1000, e -> {
+        timer = new Timer(1000, e -> {
             patient.updateVitals();
 
             tempChart.updateData(patient.getTemperatureHistory());
@@ -105,7 +112,6 @@ public class UI extends JFrame {
             rrChart.updateData(patient.getRespRateHistory());
             bpChart.updateData(patient.getBloodPressureHistory());
 
-            // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             // >>>new; ALARM+COLOR+NOTIFY
             var tList  = patient.getTemperatureHistory();
             var hrList = patient.getHeartRateHistory();
@@ -131,3 +137,17 @@ public class UI extends JFrame {
         timer.start();
     }
 }
+
+/* ----- Potential Usage -----
+import javax.swing.*;
+
+public class Main {
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new UI().initialise();
+        });
+    }
+}
+
+*/

@@ -18,9 +18,12 @@ public class Alarm {
     }
 
     private String buildMessage() {
-        return " | Vital: " + vitalSign.getClass().getSimpleName() +
-                " | Value: " + vitalSign.getValue() +
-                " | Level: " + alarmLevel;
+        return String.format(
+                " | Vital: %s | Value: %.1f | Level: %s",
+                vitalSign.getClass().getSimpleName(),
+                vitalSign.getValue(),
+                alarmLevel
+        );
     }
 
     public AlarmLevel getAlarmLevel() {

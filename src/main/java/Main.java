@@ -16,7 +16,7 @@ public class Main {
         System.out.println("Daily report generated successfully.");
     }
 }
-
+/*
 /* ----- testing UI + Patient -----
 import javax.swing.*;
 

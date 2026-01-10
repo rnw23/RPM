@@ -9,10 +9,10 @@ import java.util.Map;
 
 public class AlarmManager {
 
-    // 记录每个 vital 上一次的 level（用于“同 level 不重复更新弹窗”）
+    // record every signal from last signal
     private final Map<String, AlarmLevel> lastLevel = new HashMap<>();
 
-    // ✅ 每个 vital 只保留一个弹窗
+    // one notify every signal
     private final Map<String, JDialog> vitalDialogs = new HashMap<>();
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
 
@@ -20,28 +20,28 @@ public class AlarmManager {
         AlarmLevel level = v.getAlarmLevel();
         String key = v.getClass().getSimpleName();
 
-        // 1) 背景色始终更新
+        // 1)
         setPanelColour(panel, level);
 
-        // 2) GREEN：关闭该 vital 的弹窗（如果存在），并更新状态
+        // 2) GREEN
         if (level == AlarmLevel.GREEN) {
             lastLevel.put(key, level);
             closeVitalDialog(key);
             return;
         }
 
-        // 3) 如果 level 没变化：不重复更新（避免频繁刷新/重复弹）
+        // 3) level changes but not updated
         AlarmLevel previous = lastLevel.get(key);
         if (previous != null && previous == level) {
             return;
         }
         lastLevel.put(key, level);
 
-        // 4) 生成 alarm 信息
+        // 4)alarm info
         Alarm alarm = new Alarm(v);
-        alarm.sendNotification(); // 你现有的 console 输出
+        alarm.sendNotification();
 
-        // 5) 弹窗：非模态 + 每 vital 一个弹窗（AMBER 也可以显示，但不必 beep）
+        // 5) one vital one notify
         SwingUtilities.invokeLater(() -> {
             if (level == AlarmLevel.RED) {
                 Toolkit.getDefaultToolkit().beep(); // 只对 RED 响，避免 AMBER 烦
@@ -58,32 +58,32 @@ public class AlarmManager {
 
     private void showOrUpdateVitalDialog(String key, Component parent, String title, String message, AlarmLevel level) {
 
-        // 已存在：更新内容即可
+
         if (vitalDialogs.containsKey(key) && vitalOptionPanes.containsKey(key)) {
             JOptionPane op = vitalOptionPanes.get(key);
             op.setMessage(message);
 
-            // 更新标题（可选）
+            // update title
             JDialog dialog = vitalDialogs.get(key);
             dialog.setTitle(title);
 
-            // 让它浮到前面（可选）
+            //front）
             dialog.toFront();
             dialog.repaint();
             return;
         }
 
-        // 不存在：新建一个非模态 JDialog
+        //JDialog
         int msgType = (level == AlarmLevel.RED) ? JOptionPane.ERROR_MESSAGE : JOptionPane.WARNING_MESSAGE;
 
         JOptionPane optionPane = new JOptionPane(message, msgType);
         JDialog dialog = optionPane.createDialog(parent, title);
 
-        dialog.setModal(false); // ✅ 关键：非模态，多个弹窗可以随机关
+        dialog.setModal(false); //random clods of display
         dialog.setAlwaysOnTop(true);
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        // 关闭时把 Map 清掉（避免引用残留）
+        //
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
@@ -105,6 +105,20 @@ public class AlarmManager {
         }
         vitalDialogs.remove(key);
         vitalOptionPanes.remove(key);
+    }
+
+    //for ui not sure but work
+    public void closeDialogForVital(String vitalKey) {
+        closeVitalDialog(vitalKey);
+    }
+    // === close all alarm diaglog ===
+    public void closeAllDialogs() {
+        //avoid ConcurrentModification
+        for (JDialog d : vitalDialogs.values()) {
+            if (d != null) d.dispose();
+        }
+        vitalDialogs.clear();
+        vitalOptionPanes.clear();
     }
 
     private void setPanelColour(JComponent panel, AlarmLevel level) {
