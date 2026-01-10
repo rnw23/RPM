@@ -18,8 +18,6 @@ public abstract class VitalSign {
         return value;
     }
 
-
-
     public LocalDateTime getDateTime() {
         return dateTime;
     }
