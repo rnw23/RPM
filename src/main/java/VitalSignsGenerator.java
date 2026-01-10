@@ -8,19 +8,19 @@ public class VitalSignsGenerator {
      * Generates a random heart rate in beats per minute (bpm)
      * Typical adult resting range: 60–100 bpm
      */
-    public static int generateHeartRate() {
-        return randomIntInRange(30, 120);
+    public static double generateHeartRate() {
+        return randomDoubleInRange(30, 120);
     }
 
     /** * Generates a random systolic and diastolic value
      * Typical systolic pressure range: 100-140
      * Typical diastolic pressure range: 70-90
      */
-    public static int generateSystolic() {
-        return randomIntInRange(80, 160);
+    public static double generateSystolic() {
+        return (double)randomIntInRange(80, 160);
     }
-    public static int generateDiastolic() {
-        return randomIntInRange(50, 100);
+    public static double generateDiastolic() {
+        return (double)randomIntInRange(50, 100);
     }
 
     /**
@@ -28,15 +28,15 @@ public class VitalSignsGenerator {
      * Typical ECG signal range: -1.0 to +1.0 mV
      */
     public static double generateECG() {
-        return randomDoubleInRange(-1.0, 1.0);
+        return (double)randomDoubleInRange(-1.0, 1.0);
     }
 
     /**
      * Generates a random respiratory rate (breaths per minute)
      * Typical adult resting range: 12–20 breaths/min
      */
-    public static int generateRespiratoryRate() {
-        return randomIntInRange(7, 30);
+    public static double generateRespiratoryRate() {
+        return (double)randomIntInRange(7, 30);
     }
 
     /**
