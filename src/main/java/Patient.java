@@ -60,20 +60,17 @@ public class Patient extends VitalSignsGenerator {
         return "Patient\n"
                 + "ID: " + getId() + "\n"
                 + "Name: " + getName() + "\n"
-                + "Age: " + getAge() + "\n"
+                + "Age: " + getAge() + "years old\n"
                 + "Heart Rate: " + getHr() + " bpm\n"
                 + "Blood Pressure: " + getBp() + "\n"
-                + "Resp Rate: " + getRR() + "\n"
-                + "Temperature: " + getTemp() + "\n"
+                + "Resp Rate: " + getRR() + "breaths/min\n"
+                + "Temperature: " + getTemp() + "°C\n"
                 + "ECG: " + getECG();
     }
+}
 
-//                + "Blood Pressure: " + bp.toString() + "\n"
-//                + String.format("ECG: %.3f mV%n", ECG)
-//                + "Respiratory Rate: " + RR + " breaths/min\n"
-//                + String.format("Body Temperature:  %.1f °C%n", temp) + "\n";
-
-    /* ----- Example usage -----
+/* ----- Example usage -----
+public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         Patient p = new Patient(1,"John Smith", 35);
@@ -84,6 +81,5 @@ public class Patient extends VitalSignsGenerator {
             Thread.sleep(1000);
         }
     }
-
-     */
 }
+*/
