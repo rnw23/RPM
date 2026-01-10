@@ -6,13 +6,11 @@ import AllVitalSigns.VitalSign;
 public class VitalSignPanel extends JPanel {
 
     private List<? extends VitalSign> data;
-    private String title;
     private int maxPoints = 30;
-
     private final int PAD = 40;
 
-    public VitalSignPanel(String title) {
-        this.title = title;
+    public VitalSignPanel() {
+//        this.title = title;
         setPreferredSize(new Dimension(350, 250));
     }
 
@@ -35,7 +33,7 @@ public class VitalSignPanel extends JPanel {
         int h = getHeight();
 
         // ---- Title ----
-        g2.drawString(title, 10, 20);
+//        g2.drawString(title, 10, 20);
 
         int size = Math.min(data.size(), maxPoints);
         int start = data.size() - size;
@@ -54,7 +52,6 @@ public class VitalSignPanel extends JPanel {
             min -= 1;
         }
 
-        // ---- Draw Axes ----
         int x0 = PAD;
         int y0 = h - PAD;
         int x1 = w - PAD;
@@ -63,27 +60,26 @@ public class VitalSignPanel extends JPanel {
         g2.drawLine(x0, y0, x1, y0);   // X axis
         g2.drawLine(x0, y0, x0, y1);   // Y axis
 
-        // ---- Y Axis Ticks ----
-        int ticks = 5;
-        for (int i = 0; i <= ticks; i++) {
-            int y = y0 - i * (y0 - y1) / ticks;
-            double value = min + i * (max - min) / ticks;
+        int yTicks = 5;
+        for (int i = 0; i <= yTicks; i++) {
+            int y = y0 - i * (y0 - y1) / yTicks;
+            double value = min + i * (max - min) / yTicks;
 
             g2.drawLine(x0 - 5, y, x0 + 5, y);
             g2.drawString(String.format("%.1f", value), 5, y + 5);
         }
 
-        // ---- X Axis Ticks (seconds) ----
-        for (int i = 0; i <= ticks; i++) {
-            int x = x0 + i * (x1 - x0) / ticks;
-            int secondsAgo = (ticks - i) * (maxPoints / ticks);
+
+        int xTicks = 5; // same as yTicks
+        for (int i = 0; i <= xTicks; i++) {
+            int x = x0 + i * (x1 - x0) / xTicks;
+            int seconds = i * (maxPoints / xTicks);
 
             g2.drawLine(x, y0 - 5, x, y0 + 5);
-            g2.drawString(secondsAgo + "s", x - 10, y0 + 20);
+            g2.drawString(seconds + "s", x - 10, y0 + 20);
         }
 
-        // ---- Plot Line (THICK) ----
-        g2.setStroke(new BasicStroke(3f));   // thickness
+        g2.setStroke(new BasicStroke(3f));
 
         int prevX = x0;
         int prevY = scale(data.get(start).getValue(), min, max, h);
@@ -98,6 +94,7 @@ public class VitalSignPanel extends JPanel {
             prevY = y;
         }
     }
+
 
     private int scale(double value, double min, double max, int height) {
         double normalized = (value - min) / (max - min);

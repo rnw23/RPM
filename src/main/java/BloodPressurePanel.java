@@ -6,6 +6,7 @@ import AllVitalSigns.BloodPressure;
 public class BloodPressurePanel extends JPanel {
 
     private List<BloodPressure> data;
+    private int maxPoints = 30;
     private final int PAD = 40;
 
     public BloodPressurePanel() {
@@ -30,7 +31,7 @@ public class BloodPressurePanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
 
-        g2.drawString("Blood Pressure (Systolic / Diastolic)", 10, 20);
+//        g2.drawString("Blood Pressure (Systolic/Diastolic)", 10, 20);
 
         int size = Math.min(data.size(), 30);
         int start = data.size() - size;
@@ -43,26 +44,42 @@ public class BloodPressurePanel extends JPanel {
         int x1 = w - PAD;
         int y1 = PAD;
 
-        // Axes
         g2.drawLine(x0, y0, x1, y0);
         g2.drawLine(x0, y0, x0, y1);
 
-        g2.setStroke(new BasicStroke(3f));
+        int yTicks = 6;
+        for (int i = 0; i <= yTicks; i++) {
+            int y = y0 - i * (y0 - y1) / yTicks;
+            double value = min + i * (max - min) / yTicks;
 
-        // -------- SYSTOLIC (RED) --------
+            g2.drawLine(x0 - 5, y, x0 + 5, y);
+            g2.drawString(String.format("%.0f", value), 5, y + 5);
+        }
+
+
+        int xTicks = 6;
+        for (int i = 0; i <= xTicks; i++) {
+            int x = x0 + i * (x1 - x0) / xTicks;
+            int seconds = i * (maxPoints / xTicks);
+
+            g2.drawLine(x, y0 - 5, x, y0 + 5);
+            g2.drawString(seconds + "s", x - 10, y0 + 20);
+        }
+
+
+        g2.setStroke(new BasicStroke(3f));
         g2.setColor(Color.RED);
         drawLineSeries(g2, data, start, size, x0, x1, min, max, h, true);
 
-        // -------- DIASTOLIC (BLUE) --------
         g2.setColor(Color.BLUE);
         drawLineSeries(g2, data, start, size, x0, x1, min, max, h, false);
 
-        // Legend
         g2.setColor(Color.RED);
         g2.drawString("Systolic", w - 120, 20);
         g2.setColor(Color.BLUE);
         g2.drawString("Diastolic", w - 120, 35);
     }
+
 
     private void drawLineSeries(Graphics2D g2, List<BloodPressure> data,
                                 int start, int size,
