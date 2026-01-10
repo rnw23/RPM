@@ -81,11 +81,11 @@ public class Patient extends VitalSignsGenerator {
         return "Patient\n"
                 + "ID: " + getId() + "\n"
                 + "Name: " + getName() + "\n"
-                + "Age: " + getAge() + "years old\n"
+                + "Age: " + getAge() + " years old\n"
                 + "Heart Rate: " + getHr().getValue() + " bpm\n"
                 + "Blood Pressure: " + getBp().getValue() + "\n"
-                + "Resp Rate: " + getRR().getValue() + "breaths/min\n"
-                + "Temperature: " + String.format("%.2f",getTemp().getValue()) + "°C\n"
+                + "Resp Rate: " + getRR().getValue() + " breaths/min\n"
+                + "Temperature: " + String.format("%.2f",getTemp().getValue()) + " °C\n"
                 + "ECG: " + String.format("%.2f",getECG().getValue()) + "\n";
     }
 }
