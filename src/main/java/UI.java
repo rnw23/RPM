@@ -40,10 +40,10 @@ public class UI extends JFrame {
 
 
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
-        bodyTemperature.setBorder(BorderFactory.createTitledBorder("Body Temperature"));
-        heartRate.setBorder(BorderFactory.createTitledBorder("Heart Rate"));
-        respiratoryRate.setBorder(BorderFactory.createTitledBorder("Respiratory Rate"));
-        bloodPressure.setBorder(BorderFactory.createTitledBorder("Blood Pressure"));
+        bodyTemperature.setBorder(BorderFactory.createTitledBorder("Body Temperature (°C)"));
+        heartRate.setBorder(BorderFactory.createTitledBorder("Heart Rate (bpm)"));
+        respiratoryRate.setBorder(BorderFactory.createTitledBorder("Respiratory Rate (breaths/min)"));
+        bloodPressure.setBorder(BorderFactory.createTitledBorder("Blood Pressure (mmHg)"));
         ECGPanel.setBorder(BorderFactory.createTitledBorder("ECG"));
 
         vitalSignsPanel.setLayout(new GridLayout(2,2));
@@ -52,9 +52,9 @@ public class UI extends JFrame {
         vitalSignsPanel.add(respiratoryRate);
         vitalSignsPanel.add(bloodPressure);
 
-        tempChart = new VitalSignPanel("Temperature (°C)");
-        hrChart   = new VitalSignPanel("Heart Rate (bpm)");
-        rrChart   = new VitalSignPanel("Resp Rate (breaths/min)");
+        tempChart = new VitalSignPanel();
+        hrChart   = new VitalSignPanel();
+        rrChart   = new VitalSignPanel();
         bpChart = new BloodPressurePanel();
 
 
