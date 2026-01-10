@@ -131,17 +131,3 @@ public class UI extends JFrame {
         timer.start();
     }
 }
-
-/* ----- Potential Usage -----
-import javax.swing.*;
-
-public class Main {
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new UI().initialise();
-        });
-    }
-}
-
-*/
