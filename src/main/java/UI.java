@@ -8,12 +8,15 @@ public class UI extends JFrame {
     private VitalSignPanel tempChart;
     private VitalSignPanel hrChart;
     private VitalSignPanel rrChart;
+    private BloodPressurePanel bpChart;
+
+
 
     public void initialise(){
         patient = new Patient(1, "John Smith", 35);
 
         JFrame frame = new JFrame("Patient Monitor");
-        frame.setSize(900,500);
+        frame.setSize(900,900);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel();
@@ -35,6 +38,7 @@ public class UI extends JFrame {
         JPanel respiratoryRate = new JPanel(new BorderLayout());
         JPanel bloodPressure = new JPanel(new BorderLayout());
 
+
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
         bodyTemperature.setBorder(BorderFactory.createTitledBorder("Body Temperature"));
         heartRate.setBorder(BorderFactory.createTitledBorder("Heart Rate"));
@@ -51,10 +55,13 @@ public class UI extends JFrame {
         tempChart = new VitalSignPanel("Temperature (°C)");
         hrChart   = new VitalSignPanel("Heart Rate (bpm)");
         rrChart   = new VitalSignPanel("Resp Rate (breaths/min)");
+        bpChart = new BloodPressurePanel();
+
 
         bodyTemperature.add(tempChart, BorderLayout.CENTER);
         heartRate.add(hrChart, BorderLayout.CENTER);
         respiratoryRate.add(rrChart, BorderLayout.CENTER);
+        bloodPressure.add(bpChart, BorderLayout.CENTER);
 
         frame.setVisible(true);
         startLiveUpdates();
@@ -68,6 +75,8 @@ public class UI extends JFrame {
             tempChart.updateData(patient.getTemperatureHistory());
             hrChart.updateData(patient.getHeartRateHistory());
             rrChart.updateData(patient.getRespRateHistory());
+            bpChart.updateData(patient.getBloodPressureHistory());
+
         });
 
         timer.start();
