@@ -3,68 +3,132 @@ package RPM;
 import java.util.Random;
 
 public class VitalSignsGenerator {
-
+    private int abnormal;
     private static final Random random = new Random();
 
-    /**
-     * Generates a random heart rate in beats per minute (bpm)
-     * Typical adult resting range: 60–100 bpm
-     */
-    public static double generateHeartRate() {
-        return (double)randomIntInRange(30, 120);
+    private double HeartRate;
+    private double RespiratoryRate;
+    private double BodyTemperature;
+    private double Systolic;
+    private double Diastolic;
+    private double ECG;
+
+    private int maxHR;
+    private int minHR;
+    private int maxRR;
+    private int minRR;
+    private int maxTemp;
+    private int minTemp;
+    private int maxSyst;
+    private int minSyst;
+
+
+    private int intervalHR;
+    private int intervalRR;
+    private int intervalTemp;
+    private int intervalSyst;
+    private int intervalDia;
+
+    public VitalSignsGenerator(int abnormal){
+        //constructor
+        this.abnormal = abnormal;
+        //defining bounds based on normal/abnormal patient
+        if (this.abnormal == 1){
+            this.maxHR=130;
+            this.minHR=35;
+            this.maxRR=27;
+            this.minRR=7;
+            this.maxTemp=40;
+            this.minTemp=34;
+            this.maxSyst=160;
+            this.minSyst=80;
+
+        }
+        else {
+            //defining bounds based on normal patient
+            this.maxHR=100;
+            this.minHR=42;
+            this.maxRR=23;
+            this.minRR=10;
+            this.maxTemp=39;
+            this.minTemp=35;
+            this.maxSyst=135;
+            this.minSyst=95;
+        }
+
+        this.BodyTemperature = randomDoubleInRange(minTemp, maxTemp);
+        this.HeartRate=(double)randomIntInRange(minHR, maxHR);
+        this.RespiratoryRate=(double)randomIntInRange(minRR, maxRR);
+        this.Systolic=(double)randomIntInRange(minSyst, maxSyst);
+        this.Diastolic=(double)randomIntInRange(((int)this.Systolic-30-intervalDia), ((int)this.Systolic-30+intervalDia));
+        this.ECG=0.0;
+
+
+        intervalHR=5;
+        intervalRR=3;
+        intervalTemp=3;
+        intervalSyst=5;
+        intervalDia=5;
     }
 
-    /** * Generates a random systolic and diastolic value
-     * Typical systolic pressure range: 100-140
-     * Typical diastolic pressure range: 70-90
-     */
-    public static double generateSystolic() {
-        return (double)randomIntInRange(80, 160);
-    }
-    public static double generateDiastolic() {
-        return (double)randomIntInRange(50, 100);
-    }
-
-    /**
-     * Generates a random ECG value (simulated voltage in millivolts)
-     * Typical ECG signal range: -1.0 to +1.0 mV
-     */
-    public static double generateECG() {
-        return (double)randomDoubleInRange(-1.0, 1.0);
-    }
-/*
-    private static double t = 0.0;
-    private static final double FS = 100.0; // samples/sec
-
-    public static double generateECG() {
-        double bpm = 75.0;
-        double freq = bpm / 60.0;
-
-        double ecg = Math.sin(2 * Math.PI * freq * t);
-        double noise = (Math.random() - 0.5) * 0.05;
-
-        t += 1.0 / FS;
-        return ecg + noise;
+    public double generateHeartRate() {
+        int deltaHR = randomIntInRange(-intervalHR, intervalHR);
+        int newHR = (int)this.HeartRate + deltaHR;
+        if (newHR < this.minHR) {
+            newHR = this.minHR + intervalHR;
+        } else if (newHR > this.maxHR) {
+            newHR = this.maxHR -  intervalHR;
+        }
+        this.HeartRate = (double) newHR;
+        return this.HeartRate;
     }
 
- */
+    public double generateSystolic() {
+        int deltaSyst = randomIntInRange(-this.intervalSyst, this.intervalSyst);
+        int newSyst = (int)this.Systolic + deltaSyst;
+        if (newSyst < this.minSyst) {
+            newSyst = this.minSyst + this.intervalSyst;
+        } else if (newSyst > this.maxSyst) {
+            newSyst = this.maxSyst -  this.intervalSyst;
+        }
+        this.HeartRate = (double) newSyst;
+        return this.HeartRate;
 
-    /**
-     * Generates a random respiratory rate (breaths per minute)
-     * Typical adult resting range: 12–20 breaths/min
-     */
-    public static double generateRespiratoryRate() {
-        return (double)randomIntInRange(7, 30);
     }
 
-    /**
-     * Generates a random body temperature in Celsius
-     * Normal range: 36.1–37.2 °C
-     */
-    public static double generateBodyTemperature() {
-        return randomDoubleInRange(34, 40);
+    public double generateDiastolic() {
+        int deltaDia = randomIntInRange(-this.intervalDia, this.intervalDia);
+        this.RespiratoryRate = (double) this.Systolic -30 + deltaDia;
+        return this.Diastolic;
     }
-
+    public double generateRespiratoryRate() {
+        int deltaRR = randomIntInRange(-this.intervalRR, this.intervalRR);
+        int newRR = (int)this.RespiratoryRate + deltaRR;
+        if (newRR < this.minRR){
+            newRR = this.minRR + this.intervalRR;
+        }
+        else if (newRR > this.maxRR) {
+            newRR = this.maxRR -  this.intervalRR;
+        }
+        this.RespiratoryRate = (double) newRR;
+        return this.RespiratoryRate;
+    }
+    public double generateBodyTemperature() {
+        int deltaTemp = randomIntInRange(-this.intervalTemp, this.intervalTemp);
+        int newTemp = (int)this.BodyTemperature + deltaTemp;
+        if (newTemp < this.minTemp){
+            newTemp = this.minTemp + this.intervalTemp;
+        }
+        else if (newTemp > this.maxTemp) {
+            newTemp = this.maxTemp -  this.intervalTemp;
+        }
+        this.RespiratoryRate = (double) newTemp;
+        return this.RespiratoryRate;
+    }
+    public double generateECG() {
+        this.ECG = (double)randomDoubleInRange(-1.0, 1.0);
+        return this.ECG;
+    }
     /* ---------- Helper Methods ---------- */
 
     private static int randomIntInRange(int min, int max) {
