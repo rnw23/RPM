@@ -73,4 +73,18 @@ public class PatientDetails extends JPanel {
 
     }
 
+    public void updatePatient(Patient newPatient) {
+        this.patient = newPatient;
+
+        name.setText("Name: " + patient.getName());
+        id.setText("Patient ID: " + patient.getId());
+        age.setText("Age: " + patient.getAge());
+        location.setText("Location: " + patient.getLocation());
+        contact.setText("Contact: " + patient.getContact());
+
+        // Force a repaint to show changes immediately
+        revalidate();
+        repaint();
+    }
+
 }

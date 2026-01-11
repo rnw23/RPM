@@ -54,9 +54,13 @@ public class UI extends JFrame {
         JPanel topPanel = new JPanel();
         ECGPanel = new JPanel();
 
-        patientPanel.setPreferredSize(new Dimension(900, 100));
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        patientPanel.setPreferredSize(new Dimension(900, 120));
         patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
         patientPanel.setPreferredSize(new Dimension(900, 80));
+        selectorPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40)); // small height
+        selectorPanel.setPreferredSize(new Dimension(900, 40));
+
         ECGPanel.setPreferredSize(new Dimension(900, 150));
         ECGPanel.setLayout(new BorderLayout());
 
@@ -74,9 +78,10 @@ public class UI extends JFrame {
 
         selectorPanel.add(new JLabel("Select Patient: "));
         selectorPanel.add(patientSelector);
+        selectorPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         topPanel.add(selectorPanel);
         topPanel.add(patientPanel);
-        patientInfo = new PatientDetails(patient);
+        patientInfo = new PatientDetails(selectedPatient);
         patientPanel.add(patientInfo, BorderLayout.CENTER);
 
         //member variable changed
@@ -163,6 +168,8 @@ public class UI extends JFrame {
                 hrChart.updateData(selectedPatient.getHeartRateHistory());
                 rrChart.updateData(selectedPatient.getRespRateHistory());
                 bpChart.updateData(selectedPatient.getBloodPressureHistory());
+
+                patientInfo.updatePatient(selectedPatient);
             }
         });
 
