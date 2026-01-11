@@ -5,7 +5,6 @@ import java.awt.*;
 import Alarm.AlarmManager;
 import RPM.Patient;
 
-
 public class UI extends JFrame {
 
     private Patient patient;
@@ -15,12 +14,14 @@ public class UI extends JFrame {
     private VitalSignPanel hrChart;
     private VitalSignPanel rrChart;
     private BloodPressurePanel bpChart;
+    private ECGplot ecg;
 
     //new added
     private JPanel bodyTemperaturePanel;
     private JPanel heartRatePanel;
     private JPanel respiratoryRatePanel;
     private JPanel bloodPressurePanel;
+    private JPanel ECGPanel;
 
     //alarm manager
     private final AlarmManager alarmManager = new AlarmManager();
@@ -48,7 +49,7 @@ public class UI extends JFrame {
         mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
         mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
-        //member virable changed
+        //member variable changed
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
@@ -59,8 +60,9 @@ public class UI extends JFrame {
         heartRatePanel.setOpaque(true);
         respiratoryRatePanel.setOpaque(true);
         bloodPressurePanel.setOpaque(true);
+        ECGPanel.setOpaque(true);
 
-
+        // labelling
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
         bodyTemperaturePanel.setBorder(BorderFactory.createTitledBorder("Body Temperature (°C)"));
         heartRatePanel.setBorder(BorderFactory.createTitledBorder("Heart Rate (bpm)"));
@@ -69,7 +71,6 @@ public class UI extends JFrame {
         ECGPanel.setBorder(BorderFactory.createTitledBorder("ECG"));
 
         vitalSignsPanel.setLayout(new GridLayout(2, 2));
-
         vitalSignsPanel.add(bodyTemperaturePanel);
         vitalSignsPanel.add(heartRatePanel);
         vitalSignsPanel.add(respiratoryRatePanel);
@@ -79,17 +80,26 @@ public class UI extends JFrame {
         hrChart = new VitalSignPanel();
         rrChart = new VitalSignPanel();
         bpChart = new BloodPressurePanel();
+        //ecg = new ECGplot();
 
+        ECGplot ecg = new ECGplot();
+        ecg.setTimeWindowSeconds(10);
+        ecg.setSamplesPerSecond(100);
+        ecg.setVoltageRange(1.0); // because your generator is -1..1
+
+        //ECGPanel.add(ecg, BorderLayout.CENTER);
 
         bodyTemperaturePanel.add(tempChart, BorderLayout.CENTER);
         heartRatePanel.add(hrChart, BorderLayout.CENTER);
         respiratoryRatePanel.add(rrChart, BorderLayout.CENTER);
         bloodPressurePanel.add(bpChart, BorderLayout.CENTER);
+        //ECGPanel.add(ecg, BorderLayout.CENTER);
 
         tempChart.setOpaque(false);
         hrChart.setOpaque(false);
         rrChart.setOpaque(false);
         bpChart.setOpaque(false);
+        ecg.setOpaque(false);
 
         // >>> ADD: when closing the main window, stop updates + close all alarm dialogs
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -135,6 +145,10 @@ public class UI extends JFrame {
             // >>>>>>>>
 
         });
+
+        new Timer(33, e -> {
+            ecg.updateData(patient.getECGHistory());
+        }).start();
 
         timer.start();
     }

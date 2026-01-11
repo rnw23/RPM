@@ -32,6 +32,22 @@ public class VitalSignsGenerator {
     public static double generateECG() {
         return (double)randomDoubleInRange(-1.0, 1.0);
     }
+/*
+    private static double t = 0.0;
+    private static final double FS = 100.0; // samples/sec
+
+    public static double generateECG() {
+        double bpm = 75.0;
+        double freq = bpm / 60.0;
+
+        double ecg = Math.sin(2 * Math.PI * freq * t);
+        double noise = (Math.random() - 0.5) * 0.05;
+
+        t += 1.0 / FS;
+        return ecg + noise;
+    }
+
+ */
 
     /**
      * Generates a random respiratory rate (breaths per minute)

@@ -47,6 +47,16 @@ public class Patient extends VitalSignsGenerator {
 
     public int getAge() { return age; }
 
+    public HeartRate getHr() { return HeartRateHistory.get(HeartRateHistory.size() - 1); }
+
+    public BloodPressure getBp(){ return BloodPressureHistory.get(BloodPressureHistory.size() - 1); }
+
+    public RespRate getRR(){ return RespRateHistory.get(RespRateHistory.size() - 1); }
+
+    public Temperature getTemp(){ return TemperatureHistory.get(TemperatureHistory.size() - 1); }
+
+    public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
+
     public ArrayList<ECG> getECGHistory() {
         return ECGHistory;
     }
@@ -104,15 +114,7 @@ public class Patient extends VitalSignsGenerator {
         return genArray(ECGHistory, sec);
     }
 
-    public HeartRate getHr(){ return HeartRateHistory.get(HeartRateHistory.size() - 1); }
 
-    public BloodPressure getBp(){ return BloodPressureHistory.get(BloodPressureHistory.size() - 1); }
-
-    public RespRate getRr(){ return RespRateHistory.get(RespRateHistory.size() - 1); }
-
-    public Temperature getTemp(){ return TemperatureHistory.get(TemperatureHistory.size() - 1); }
-
-    public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
 
 
     /* ----- Potential Display in the UI.UI ----- */
@@ -123,8 +125,8 @@ public class Patient extends VitalSignsGenerator {
                 + "Age: " + getAge() + " years old\n"
                 + "Heart Rate: " + getHr().getValue() + " bpm\n"
                 + "Blood Pressure: " + getBp().getValue() + "\n"
-                + "Resp Rate: " + getRr().getValue() + " breaths/min\n"
+                + "Resp Rate: " + getRR().getValue() + " breaths/min\n"
                 + "Temperature: " + String.format("%.2f",getTemp().getValue()) + " °C\n"
-                + "ECG: " + String.format("%.2f",getECG().getValue()) + "\n";
+                + "ECG: " + String.format("%.2f",getECG().getVoltage()) + "\n";
     }
 }
