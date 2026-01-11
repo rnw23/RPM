@@ -27,6 +27,8 @@ public class UI extends JFrame {
     private JPanel bloodPressurePanel;
     private JPanel ECGPanel;
 
+    private JToggleButton heartbeatToggle;
+
     //alarm manager
     private final AlarmManager alarmManager = new AlarmManager();
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -121,6 +123,19 @@ public class UI extends JFrame {
         bpChart.setOpaque(false);
         ecg.setOpaque(false);
 
+        // Add heartbeat toggle button
+        heartbeatToggle = new JToggleButton("Heartbeat Sound OFF");
+        heartRatePanel.add(heartbeatToggle, BorderLayout.SOUTH);
+
+        heartbeatToggle.addActionListener(e -> {
+            if (heartbeatToggle.isSelected()) {
+                heartbeatToggle.setText("Heartbeat Sound OFF");
+            } else {
+                heartbeatToggle.setText("Heartbeat Sound ON");
+            }
+        });
+
+
         // >>> ADD: when closing the main window, stop updates + close all alarm dialogs
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -181,7 +196,23 @@ public class UI extends JFrame {
             if (!bpList.isEmpty()) {
                 alarmManager.applyUIAndNotify(bpList.get(bpList.size() - 1), bloodPressurePanel);
             }
-            // >>>>>>>>
+
+
+
+
+            if (heartbeatToggle.isSelected()) {
+                double currentHR = selectedPatient.getHr().getValue(); // bpm
+                int interval = (int)(60000 / currentHR);          // ms between beats
+                new Thread(() -> {
+                    Heartbeat.playThump(300, 80); // your current tone
+                    try {
+                        Thread.sleep(interval);
+                    } catch (InterruptedException ex) { }
+                }).start();
+            }
+            else{
+
+            }
 
         });
 
