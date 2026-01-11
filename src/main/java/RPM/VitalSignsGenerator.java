@@ -25,7 +25,7 @@ public class VitalSignsGenerator {
 
     private int intervalHR;
     private int intervalRR;
-    private int intervalTemp;
+    private double intervalTemp;
     private int intervalSyst;
     private int intervalDia;
 
@@ -64,20 +64,20 @@ public class VitalSignsGenerator {
         this.ECG=0.0;
 
 
-        intervalHR=5;
-        intervalRR=3;
-        intervalTemp=3;
-        intervalSyst=5;
-        intervalDia=5;
+        intervalHR=1;
+        intervalRR=1;
+        intervalTemp=0.25;
+        intervalSyst=3;
+        intervalDia=3;
     }
 
     public double generateHeartRate() {
         int deltaHR = randomIntInRange(-intervalHR, intervalHR);
         int newHR = (int)this.HeartRate + deltaHR;
         if (newHR < this.minHR) {
-            newHR = this.minHR + intervalHR;
+            newHR = this.minHR + (this.minHR - newHR);
         } else if (newHR > this.maxHR) {
-            newHR = this.maxHR -  intervalHR;
+            newHR = this.maxHR - (newHR - this.maxHR);
         }
         this.HeartRate = (double) newHR;
         return this.HeartRate;
@@ -98,24 +98,23 @@ public class VitalSignsGenerator {
 
     public double generateDiastolic() {
         int deltaDia = randomIntInRange(-this.intervalDia, this.intervalDia);
-        this.RespiratoryRate = (double) this.Systolic -30 + deltaDia;
+        this.Diastolic = (double) this.Systolic -30 + deltaDia;
         return this.Diastolic;
     }
     public double generateRespiratoryRate() {
         int deltaRR = randomIntInRange(-this.intervalRR, this.intervalRR);
         int newRR = (int)this.RespiratoryRate + deltaRR;
-        if (newRR < this.minRR){
-            newRR = this.minRR + this.intervalRR;
-        }
-        else if (newRR > this.maxRR) {
-            newRR = this.maxRR -  this.intervalRR;
+        if (newRR < this.minRR) {
+            newRR = this.minRR + (this.minRR - newRR);
+        } else if (newRR > this.maxRR) {
+            newRR = this.maxRR - (newRR - this.maxRR);
         }
         this.RespiratoryRate = (double) newRR;
         return this.RespiratoryRate;
     }
     public double generateBodyTemperature() {
-        int deltaTemp = randomIntInRange(-this.intervalTemp, this.intervalTemp);
-        int newTemp = (int)this.BodyTemperature + deltaTemp;
+        double deltaTemp = randomDoubleInRange(-this.intervalTemp, this.intervalTemp);
+        double newTemp = (int)this.BodyTemperature + deltaTemp;
         if (newTemp < this.minTemp){
             newTemp = this.minTemp + this.intervalTemp;
         }
