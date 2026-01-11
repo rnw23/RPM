@@ -115,7 +115,7 @@ public class UI extends JFrame {
             windowLabel.setText("Window: " + windowSec + "s");
 
             // refresch immediately
-            //refreshCharts();
+            refreshCharts();
         });
 
         // ---- prevent alarm popups from interrupting nurse input ----
