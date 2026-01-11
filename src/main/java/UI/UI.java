@@ -1,6 +1,9 @@
+package UI;
+
 import javax.swing.*;
 import java.awt.*;
 import Alarm.AlarmManager;
+import RPM.Patient;
 
 
 public class UI extends JFrame {
@@ -28,7 +31,7 @@ public class UI extends JFrame {
     public void initialise(){
         patient = new Patient(1, "John Smith", 35);
 
-        JFrame frame = new JFrame("Patient Monitor");
+        JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900,900);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -136,18 +139,3 @@ public class UI extends JFrame {
 
         timer.start();
     }
-}
-
-/* ----- Potential Usage -----
-import javax.swing.*;
-
-public class Main {
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            new UI().initialise();
-        });
-    }
-}
-
-*/

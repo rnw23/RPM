@@ -1,3 +1,5 @@
+package RPM;
+
 import AllVitalSigns.*;
 import java.util.ArrayList;
 
@@ -26,11 +28,11 @@ public class Patient extends VitalSignsGenerator {
     }
 
     public void updateVitals() {
-        HeartRateHistory.add(new HeartRate(generateHeartRate()));
-        BloodPressureHistory.add(new BloodPressure(generateSystolic(), generateDiastolic()));
-        RespRateHistory.add(new RespRate(generateRespiratoryRate()));
-        TemperatureHistory.add(new Temperature(generateBodyTemperature()));
-        ECGHistory.add(new ECG(generateECG()));
+        HeartRateHistory.add(new HeartRate(VitalSignsGenerator.generateHeartRate()));
+        BloodPressureHistory.add(new BloodPressure(VitalSignsGenerator.generateSystolic(), VitalSignsGenerator.generateDiastolic()));
+        RespRateHistory.add(new RespRate(VitalSignsGenerator.generateRespiratoryRate()));
+        TemperatureHistory.add(new Temperature(VitalSignsGenerator.generateBodyTemperature()));
+        ECGHistory.add(new ECG(VitalSignsGenerator.generateECG()));
 
     }
 
@@ -113,9 +115,9 @@ public class Patient extends VitalSignsGenerator {
     public ECG getECG(){ return ECGHistory.get(ECGHistory.size() - 1); }
 
 
-    /* ----- Potential Display in the UI ----- */
+    /* ----- Potential Display in the UI.UI ----- */
     public String PatientDisplay() {
-        return "Patient\n"
+        return "RPM.Patient\n"
                 + "ID: " + getId() + "\n"
                 + "Name: " + getName() + "\n"
                 + "Age: " + getAge() + " years old\n"

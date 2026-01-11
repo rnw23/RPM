@@ -1,3 +1,5 @@
+package DailyReport;
+
 import Alarm.AlarmLevel;
 import AllVitalSigns.VitalSign;
 

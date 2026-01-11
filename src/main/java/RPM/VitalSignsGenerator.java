@@ -1,3 +1,5 @@
+package RPM;
+
 import java.util.Random;
 
 public class VitalSignsGenerator {

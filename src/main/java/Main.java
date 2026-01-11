@@ -1,12 +1,23 @@
-/* ----- testing Daily Report ----- */
+import DailyReport.DailyReport;
+import RPM.Patient;
+import UI.UI;
+
+import javax.swing.*;
+
+/* ----- testing Daily Report + UI.UI + RPM.Patient ----- */
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
         Patient p = new Patient(1, "John Smith", 35);
 
+        SwingUtilities.invokeLater(() -> {
+            new UI().initialise();
+        });
+
         for (int i = 0; i < 60; i++) { // 24 minutes
             p.updateVitals();
+            System.out.println(p.PatientDisplay());
             Thread.sleep(1000);
         }
 
@@ -16,35 +27,14 @@ public class Main {
         System.out.println("Daily report generated successfully.");
     }
 }
-/*
-/* ----- testing UI + Patient -----
-import javax.swing.*;
-
-public class Main {
-
-    public static void main(String[] args) throws InterruptedException {
-        Patient p = new Patient(1,"John Smith", 35);
-
-        SwingUtilities.invokeLater(() -> {
-            new UI().initialise();
-        });
-
-        while (true) {
-            p.updateVitals();
-            System.out.println(p.PatientDisplay());
-            Thread.sleep(1000);
-        }
-    }
-}
- */
 
 /* ----- testing Listener -----
     public static void main(String[] args) {
 
-        VitalSignsGenerator simulator = new VitalSignsGenerator();
+        RPM.VitalSignsGenerator simulator = new RPM.VitalSignsGenerator();
 
         AlarmLevel alarm = new AlarmLevel();
-        UI ui = new UI();
+        UI.UI ui = new UI.UI();
         DatabaseRepository repo = new DatabaseRepository();
 
         simulator.addListener(alarm);
