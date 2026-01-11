@@ -51,6 +51,7 @@ public class UI extends JFrame {
         patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
         patientPanel.setPreferredSize(new Dimension(900, 80));
         ECGPanel.setPreferredSize(new Dimension(900, 150));
+        ECGPanel.setLayout(new BorderLayout());
 
         frame.setContentPane(mainPanel);
         mainPanel.setLayout(new BorderLayout());
@@ -99,7 +100,7 @@ public class UI extends JFrame {
         hrChart = new VitalSignPanel();
         rrChart = new VitalSignPanel();
         bpChart = new BloodPressurePanel();
-        //ecg = new ECGplot();
+        ecg = new ECGplot();
 
         ecg = new ECGplot();
         ecg.setTimeWindowSeconds(10);
@@ -112,7 +113,7 @@ public class UI extends JFrame {
         heartRatePanel.add(hrChart, BorderLayout.CENTER);
         respiratoryRatePanel.add(rrChart, BorderLayout.CENTER);
         bloodPressurePanel.add(bpChart, BorderLayout.CENTER);
-        //ECGPanel.add(ecg, BorderLayout.CENTER);
+        ECGPanel.add(ecg, BorderLayout.CENTER);
 
         tempChart.setOpaque(false);
         hrChart.setOpaque(false);
