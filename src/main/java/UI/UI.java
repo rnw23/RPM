@@ -2,12 +2,16 @@ package UI;
 
 import javax.swing.*;
 import java.awt.*;
-import Alarm.AlarmManager;
-import RPM.Patient;
+import java.util.ArrayList;
+
+import Alarm.*;
+import RPM.*;
 
 public class UI extends JFrame {
 
-    private Patient patient;
+    private ArrayList<Patient> patients;
+    private Patient selectedPatient;
+    private JComboBox<String> patientSelector;
     private Timer timer;
 
     private VitalSignPanel tempChart;
@@ -29,7 +33,12 @@ public class UI extends JFrame {
 
 
     public void initialise() {
-        patient = new Patient(1, "John Smith", 35);
+        patients = new ArrayList<>();
+        patients.add(new Patient(1, "John Smith", 35));
+        patients.add(new Patient(2, "Alice Brown", 42));
+        patients.add(new Patient(3, "David Lee", 29));
+
+        selectedPatient = patients.get(0);   // default selection
 
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
@@ -37,18 +46,31 @@ public class UI extends JFrame {
 
         JPanel mainPanel = new JPanel();
         JPanel patientPanel = new JPanel();
+        JPanel selectorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JPanel vitalSignsPanel = new JPanel();
-        JPanel ECGPanel = new JPanel();
+        JPanel topPanel = new JPanel();
+        ECGPanel = new JPanel();
 
+        patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
         patientPanel.setPreferredSize(new Dimension(900, 80));
         ECGPanel.setPreferredSize(new Dimension(900, 150));
 
         frame.setContentPane(mainPanel);
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(patientPanel, BorderLayout.NORTH);
+        mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
         mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
+        patientSelector = new JComboBox<>();
+
+        for (Patient p : patients) {
+            patientSelector.addItem(p.getName());
+        }
+
+        selectorPanel.add(new JLabel("Select Patient: "));
+        selectorPanel.add(patientSelector);
+        topPanel.add(selectorPanel);
+        topPanel.add(patientPanel);
         //member variable changed
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
@@ -82,7 +104,7 @@ public class UI extends JFrame {
         bpChart = new BloodPressurePanel();
         //ecg = new ECGplot();
 
-        ECGplot ecg = new ECGplot();
+        ecg = new ECGplot();
         ecg.setTimeWindowSeconds(10);
         ecg.setSamplesPerSecond(100);
         ecg.setVoltageRange(1.0); // because your generator is -1..1
@@ -110,6 +132,20 @@ public class UI extends JFrame {
             }
         });
 
+        patientSelector.addActionListener(e -> {
+            int index = patientSelector.getSelectedIndex();
+            if (index >= 0) {
+                selectedPatient = patients.get(index);
+
+                // Refresh charts immediately
+                tempChart.updateData(selectedPatient.getTemperatureHistory());
+                hrChart.updateData(selectedPatient.getHeartRateHistory());
+                rrChart.updateData(selectedPatient.getRespRateHistory());
+                bpChart.updateData(selectedPatient.getBloodPressureHistory());
+            }
+        });
+
+
         frame.setVisible(true);
         startLiveUpdates();
     }
@@ -117,18 +153,23 @@ public class UI extends JFrame {
     private void startLiveUpdates() {
 
         timer = new Timer(1000, e -> {
-            patient.updateVitals();
+            for (Patient p : patients) {
+                p.updateVitals();    // all patients continue generating data
+            }
 
-            tempChart.updateData(patient.getTemperatureHistory());
-            hrChart.updateData(patient.getHeartRateHistory());
-            rrChart.updateData(patient.getRespRateHistory());
-            bpChart.updateData(patient.getBloodPressureHistory());
+            tempChart.updateData(selectedPatient.getTemperatureHistory());
+            hrChart.updateData(selectedPatient.getHeartRateHistory());
+            rrChart.updateData(selectedPatient.getRespRateHistory());
+            bpChart.updateData(selectedPatient.getBloodPressureHistory());
+
+
 
             // >>>new; ALARM+COLOR+NOTIFY
-            var tList = patient.getTemperatureHistory();
-            var hrList = patient.getHeartRateHistory();
-            var rrList = patient.getRespRateHistory();
-            var bpList = patient.getBloodPressureHistory();
+            var tList = selectedPatient.getTemperatureHistory();
+            var hrList = selectedPatient.getHeartRateHistory();
+            var rrList = selectedPatient.getRespRateHistory();
+            var bpList = selectedPatient.getBloodPressureHistory();
+
 
             if (!tList.isEmpty()) {
                 alarmManager.applyUIAndNotify(tList.get(tList.size() - 1), bodyTemperaturePanel);
@@ -147,7 +188,8 @@ public class UI extends JFrame {
         });
 
         new Timer(33, e -> {
-            ecg.updateData(patient.getECGHistory());
+            ecg.updateData(selectedPatient.getECGHistory());
+
         }).start();
 
         timer.start();

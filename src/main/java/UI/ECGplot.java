@@ -1,6 +1,6 @@
 package UI;
 
-import AllVitalSigns.ECG;
+import AllVitalSigns.*;
 
 import javax.swing.*;
 import java.awt.*;
