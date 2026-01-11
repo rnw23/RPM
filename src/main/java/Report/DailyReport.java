@@ -1,4 +1,4 @@
-package DailyReport;
+package Report;
 
 import Alarm.AlarmLevel;
 import AllVitalSigns.*;
