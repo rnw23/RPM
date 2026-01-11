@@ -10,6 +10,8 @@ public class Main {
 
     public static void main(String[] args) {
 
+        Patient p = new Patient(1, "John Smith", 35, "Ward B", "123456789");
+
         // ---------------------------
         // 1. Launch UI (EDT thread)
         // ---------------------------
@@ -23,7 +25,7 @@ public class Main {
         new Thread(() -> {
             try {
                 PatientBase database = new PatientBase();
-                Patient p = database.getPatient(0);   // test first patient
+                Patient p1 = database.getPatient(0);   // test first patient
 
                 // Simulate 60 seconds of data
                 for (int i = 0; i < 60; i++) {

@@ -7,6 +7,8 @@ public class Patient extends VitalSignsGenerator {
     private int id;
     private String name;
     private int age;
+    private String location;
+    private String contact;
     private ArrayList<HeartRate> HeartRateHistory;
     private ArrayList<BloodPressure> BloodPressureHistory;
     private ArrayList<RespRate> RespRateHistory;
@@ -14,10 +16,12 @@ public class Patient extends VitalSignsGenerator {
     private ArrayList<ECG> ECGHistory;
 
 
-    public Patient(int id, String name, int age) {
+    public Patient(int id, String name, int age, String location, String contact) {
         this.id = id;
         this.name = name;
         this.age = age;
+        this.location = location;
+        this.contact = contact;
         this.HeartRateHistory = new ArrayList<>();
         this.BloodPressureHistory = new ArrayList<>();
         this.RespRateHistory = new ArrayList<>();
@@ -46,6 +50,10 @@ public class Patient extends VitalSignsGenerator {
     }
 
     public int getAge() { return age; }
+
+    public String getLocation() { return location; }
+
+    public String getContact() { return contact; }
 
     public HeartRate getHr() { return HeartRateHistory.get(HeartRateHistory.size() - 1); }
 

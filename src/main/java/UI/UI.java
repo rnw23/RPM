@@ -11,8 +11,10 @@ public class UI extends JFrame {
 
     private PatientBase patients;
     private Patient selectedPatient;
+    private Patient patient;
     private JComboBox<String> patientSelector;
     private Timer timer;
+    private PatientDetails patientInfo;
 
     private VitalSignPanel tempChart;
     private VitalSignPanel hrChart;
@@ -26,6 +28,7 @@ public class UI extends JFrame {
     private JPanel respiratoryRatePanel;
     private JPanel bloodPressurePanel;
     private JPanel ECGPanel;
+    private JPanel patientPanel;
 
     private JToggleButton heartbeatToggle;
 
@@ -35,6 +38,7 @@ public class UI extends JFrame {
 
 
     public void initialise() {
+        patient = new Patient(1, "John Smith", 35, "Ward B", "123456789");
         patients = new PatientBase();
         selectedPatient = patients.getPatient(0);
 
@@ -50,6 +54,7 @@ public class UI extends JFrame {
         JPanel topPanel = new JPanel();
         ECGPanel = new JPanel();
 
+        patientPanel.setPreferredSize(new Dimension(900, 100));
         patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
         patientPanel.setPreferredSize(new Dimension(900, 80));
         ECGPanel.setPreferredSize(new Dimension(900, 150));
@@ -71,6 +76,9 @@ public class UI extends JFrame {
         selectorPanel.add(patientSelector);
         topPanel.add(selectorPanel);
         topPanel.add(patientPanel);
+        patientInfo = new PatientDetails(patient);
+        patientPanel.add(patientInfo, BorderLayout.CENTER);
+
         //member variable changed
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
