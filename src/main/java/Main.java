@@ -1,5 +1,5 @@
 import DailyReport.DailyReport;
-import RPM.Patient;
+import RPM.*;
 import UI.UI;
 
 import javax.swing.*;
@@ -8,33 +8,55 @@ import java.time.format.DateTimeFormatter;
 
 public class Main {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+
+        // ---------------------------
+        // 1. Launch UI (EDT thread)
+        // ---------------------------
         SwingUtilities.invokeLater(() -> {
             new UI().initialise();
         });
+
+        // ---------------------------
+        // 2. Run testing in background thread
+        // ---------------------------
+        new Thread(() -> {
+            try {
+                PatientBase database = new PatientBase();
+                Patient p = database.getPatient(0);   // test first patient
+
+                // Simulate 60 seconds of data
+                for (int i = 0; i < 60; i++) {
+                    p.updateVitals();
+                    System.out.println(p.PatientDisplay());
+                    Thread.sleep(1000);
+                }
+
+                // ---------------------------
+                // 3. Generate Daily Report
+                // ---------------------------
+                DailyReport report = new DailyReport(p);
+
+                String date = LocalDate.now()
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+                String safeName = p.getName()
+                        .trim()
+                        .replaceAll("\\s+", "_")
+                        .replaceAll("[^a-zA-Z0-9_\\-]", "");
+
+                String filename = "DailyReport_" + date + "_" + safeName + ".xlsx";
+
+                report.exportExcel(filename);
+
+                System.out.println("Daily report generated successfully: " + filename);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 }
-//        SwingUtilities.invokeLater(() -> {
-//            new UI().initialise();
-//        });
-//        for (int i = 0; i < 60; i++) {
-//            // e.g., 60 seconds for testing
-//            p.updateVitals();
-//            System.out.println(p.PatientDisplay());
-//            Thread.sleep(1000); }
-//        }
-//            DailyReport report = new DailyReport(p);
-//
-//        // --- Build filename: DailyReport_(Date)_(Patient name).xlsx ---
-//        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//        String safeName = p.getName().trim().replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9_\\-]", "");
-//        String filename = "DailyReport_" + date + "_" + safeName + ".xlsx";
-//
-//        report.exportExcel(filename);
-//
-//        System.out.println("Daily report generated successfully: " + filename);
-//    }
-//}
 
 /* ----- testing Listener -----
     public static void main(String[] args) {
