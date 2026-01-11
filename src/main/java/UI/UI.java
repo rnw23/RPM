@@ -9,7 +9,7 @@ import RPM.*;
 
 public class UI extends JFrame {
 
-    private ArrayList<Patient> patients;
+    private PatientBase patients;
     private Patient selectedPatient;
     private JComboBox<String> patientSelector;
     private Timer timer;
@@ -33,12 +33,9 @@ public class UI extends JFrame {
 
 
     public void initialise() {
-        patients = new ArrayList<>();
-        patients.add(new Patient(1, "John Smith", 35));
-        patients.add(new Patient(2, "Alice Brown", 42));
-        patients.add(new Patient(3, "David Lee", 29));
+        patients = new PatientBase();
+        selectedPatient = patients.getPatient(0);
 
-        selectedPatient = patients.get(0);   // default selection
 
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
@@ -63,7 +60,7 @@ public class UI extends JFrame {
 
         patientSelector = new JComboBox<>();
 
-        for (Patient p : patients) {
+        for (Patient p : patients.getPatients()) {
             patientSelector.addItem(p.getName());
         }
 
@@ -135,7 +132,7 @@ public class UI extends JFrame {
         patientSelector.addActionListener(e -> {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
-                selectedPatient = patients.get(index);
+                selectedPatient = patients.getPatient(index);
 
                 // Refresh charts immediately
                 tempChart.updateData(selectedPatient.getTemperatureHistory());
@@ -153,7 +150,7 @@ public class UI extends JFrame {
     private void startLiveUpdates() {
 
         timer = new Timer(1000, e -> {
-            for (Patient p : patients) {
+            for (Patient p : patients.getPatients()) {
                 p.updateVitals();    // all patients continue generating data
             }
 
