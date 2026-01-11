@@ -3,7 +3,8 @@ package RPM;
 import AllVitalSigns.*;
 import java.util.ArrayList;
 
-public class Patient extends VitalSignsGenerator {
+public class Patient {
+    private VitalSignsGenerator generator;
     private int id;
     private String name;
     private int age;
@@ -27,16 +28,17 @@ public class Patient extends VitalSignsGenerator {
         this.RespRateHistory = new ArrayList<>();
         this.TemperatureHistory = new ArrayList<>();
         this.ECGHistory = new ArrayList<>();
+        this.generator = new VitalSignsGenerator(1);
         updateVitals();
 
     }
 
     public void updateVitals() {
-        HeartRateHistory.add(new HeartRate(VitalSignsGenerator.generateHeartRate()));
-        BloodPressureHistory.add(new BloodPressure(VitalSignsGenerator.generateSystolic(), VitalSignsGenerator.generateDiastolic()));
-        RespRateHistory.add(new RespRate(VitalSignsGenerator.generateRespiratoryRate()));
-        TemperatureHistory.add(new Temperature(VitalSignsGenerator.generateBodyTemperature()));
-        ECGHistory.add(new ECG(VitalSignsGenerator.generateECG()));
+        HeartRateHistory.add(new HeartRate(generator.generateHeartRate()));
+        BloodPressureHistory.add(new BloodPressure(generator.generateSystolic(), generator.generateDiastolic()));
+        RespRateHistory.add(new RespRate(generator.generateRespiratoryRate()));
+        TemperatureHistory.add(new Temperature(generator.generateBodyTemperature()));
+        ECGHistory.add(new ECG(generator.generateECG()));
 
     }
 
