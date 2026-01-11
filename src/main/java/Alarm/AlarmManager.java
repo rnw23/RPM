@@ -1,5 +1,6 @@
 package Alarm;
-
+import java.time.Duration;
+import java.time.LocalDateTime;
 import AllVitalSigns.VitalSign;
 
 import javax.swing.*;
@@ -15,6 +16,25 @@ public class AlarmManager {
     // one notify every signal
     private final Map<String, JDialog> vitalDialogs = new HashMap<>();
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
+
+    private String recipientEmail = "your@email.com"; // 默认，UI 可改
+
+    private final Duration emailCooldown = Duration.ofSeconds(10);
+    private final Map<String, LocalDateTime> lastEmailSent = new HashMap<>();
+
+    // wait UI to get SMTP
+    private AlarmEmailService emailService = null;
+
+
+    public void configureEmail(String smtpHost, int smtpPort, String senderEmail, String appPassword, boolean useTls) {
+        this.emailService = new AlarmEmailService(smtpHost, smtpPort, senderEmail, appPassword, useTls);
+    }
+
+    public void setRecipientEmail(String email) {
+        if (email == null) return;
+        email = email.trim();
+        if (!email.isEmpty()) this.recipientEmail = email;
+    }
 
     public void applyUIAndNotify(VitalSign v, JComponent panel) {
         AlarmLevel level = v.getAlarmLevel();
@@ -40,6 +60,21 @@ public class AlarmManager {
         // 4)alarm info
         Alarm alarm = new Alarm(v);
         alarm.sendNotification();
+        // only red send email
+        if (level == AlarmLevel.RED && emailService != null) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime last = lastEmailSent.get(key);
+
+            boolean inCooldown = (last != null) && Duration.between(last, now).compareTo(emailCooldown) < 0;
+
+            if (!inCooldown) {
+                String subject = "RED ALARM: " + key + " (" + level + ")";
+                String body = alarm.getMessage();
+
+                emailService.sendEmail(recipientEmail, subject, body);
+                lastEmailSent.put(key, now);
+            }
+        }
 
         // 5) one vital one notify
         SwingUtilities.invokeLater(() -> {

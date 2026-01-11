@@ -6,7 +6,8 @@ import java.util.ArrayList;
 
 import Alarm.*;
 import RPM.*;
-
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 public class UI extends JFrame {
 
     private PatientBase patients;
@@ -14,6 +15,9 @@ public class UI extends JFrame {
     private Patient patient;
     private JComboBox<String> patientSelector;
     private Timer timer;
+    private JSlider windowSlider;
+    private JLabel windowLabel;
+    private int windowSec = 10; // default
     private PatientDetails patientInfo;
 
     private VitalSignPanel tempChart;
@@ -34,6 +38,8 @@ public class UI extends JFrame {
 
     //alarm manager
     private final AlarmManager alarmManager = new AlarmManager();
+    private boolean isEditingSettings = false;
+
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -74,10 +80,86 @@ public class UI extends JFrame {
 
         for (Patient p : patients.getPatients()) {
             patientSelector.addItem(p.getName());
+
         }
 
         selectorPanel.add(new JLabel("Select Patient: "));
         selectorPanel.add(patientSelector);
+
+        //input by nurse of email
+        selectorPanel.add(new JLabel("Alert To: "));
+        JTextField toField = new JTextField("your@outlook.com", 18);
+        selectorPanel.add(toField);
+
+        selectorPanel.add(new JLabel("Sender: "));
+        JTextField senderField = new JTextField("your@outlook.com", 18);
+        selectorPanel.add(senderField);
+
+        selectorPanel.add(new JLabel("AppPwd: "));
+        JPasswordField pwdField = new JPasswordField(16);
+        selectorPanel.add(pwdField);
+
+        //N slides
+
+        windowLabel = new JLabel("Window: 10s");
+        selectorPanel.add(windowLabel);
+
+        windowSlider = new JSlider(5, 60, 10); // min=5s max=60s default=10s
+        windowSlider.setMajorTickSpacing(5);
+        windowSlider.setPaintTicks(true);
+
+        selectorPanel.add(windowSlider);
+
+        windowSlider.addChangeListener(e -> {
+            windowSec = windowSlider.getValue();
+            windowLabel.setText("Window: " + windowSec + "s");
+
+            // refresch immediately
+            //refreshCharts();
+        });
+
+        // ---- prevent alarm popups from interrupting nurse input ----
+        toField.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
+            @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
+        });
+
+        senderField.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
+            @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
+        });
+
+        pwdField.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
+            @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
+        });
+
+        JButton applyEmailBtn = new JButton("Apply Email");
+        selectorPanel.add(applyEmailBtn);
+
+// ser defalut email sender
+        alarmManager.setRecipientEmail(toField.getText());
+
+        applyEmailBtn.addActionListener(e -> {
+            String to = toField.getText().trim();
+            String sender = senderField.getText().trim();
+            String appPwd = new String(pwdField.getPassword());
+
+            alarmManager.setRecipientEmail(to);
+
+            // outlook SMTP:
+            alarmManager.configureEmail(
+                    "smtp.office365.com",
+                    587,
+                    sender,
+                    appPwd,
+                    true
+            );
+
+            JOptionPane.showMessageDialog(frame, "Email settings applied.");
+        });
+        //done
+
         selectorPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         topPanel.add(selectorPanel);
         topPanel.add(patientPanel);
@@ -185,10 +267,7 @@ public class UI extends JFrame {
                 p.updateVitals();    // all patients continue generating data
             }
 
-            tempChart.updateData(selectedPatient.getTemperatureHistory());
-            hrChart.updateData(selectedPatient.getHeartRateHistory());
-            rrChart.updateData(selectedPatient.getRespRateHistory());
-            bpChart.updateData(selectedPatient.getBloodPressureHistory());
+            refreshCharts();
 
 
 
@@ -199,16 +278,16 @@ public class UI extends JFrame {
             var bpList = selectedPatient.getBloodPressureHistory();
 
 
-            if (!tList.isEmpty()) {
+            if (!isEditingSettings && !tList.isEmpty()) {
                 alarmManager.applyUIAndNotify(tList.get(tList.size() - 1), bodyTemperaturePanel);
             }
-            if (!hrList.isEmpty()) {
+            if (!isEditingSettings && !hrList.isEmpty()) {
                 alarmManager.applyUIAndNotify(hrList.get(hrList.size() - 1), heartRatePanel);
             }
-            if (!rrList.isEmpty()) {
+            if (!isEditingSettings && !rrList.isEmpty()) {
                 alarmManager.applyUIAndNotify(rrList.get(rrList.size() - 1), respiratoryRatePanel);
             }
-            if (!bpList.isEmpty()) {
+            if (!isEditingSettings && !bpList.isEmpty()) {
                 alarmManager.applyUIAndNotify(bpList.get(bpList.size() - 1), bloodPressurePanel);
             }
 
@@ -232,10 +311,23 @@ public class UI extends JFrame {
         });
 
         new Timer(33, e -> {
-            ecg.updateData(selectedPatient.getECGHistory());
+            var ecgHist = selectedPatient.getECGHistory();
+            ecg.updateData(ecgHist);
 
+            if (!isEditingSettings && !ecgHist.isEmpty()) {
+                var latest = ecgHist.get(ecgHist.size() - 1);
+                alarmManager.applyUIAndNotify(latest, ECGPanel);
+            }
         }).start();
 
         timer.start();
     }
+    private void refreshCharts() {
+        tempChart.updateData(selectedPatient.getTempArr(windowSec));
+        hrChart.updateData(selectedPatient.getHrArr(windowSec));
+        rrChart.updateData(selectedPatient.getRrArr(windowSec));
+        bpChart.updateData(selectedPatient.getBpArr(windowSec));
+    }
+
+
 }
