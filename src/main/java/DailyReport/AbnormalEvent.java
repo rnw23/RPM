@@ -1,36 +1,43 @@
 package DailyReport;
 
 import Alarm.AlarmLevel;
-import AllVitalSigns.VitalSign;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class AbnormalEvent {
-    private String vitalName;
-    private double value;
-    private AlarmLevel level;
-    private LocalDateTime dateTime;
 
-    public AbnormalEvent(VitalSign vitalSign) {
-        this.vitalName = vitalSign.getClass().getSimpleName();
-        this.value = vitalSign.getValue();
-        this.level = vitalSign.getAlarmLevel();
-        this.dateTime = vitalSign.getDateTime();
+    private static final DateTimeFormatter SECOND_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    private final LocalDateTime second;
+    private final String vitalType;
+    private final double value;
+    private final AlarmLevel level;
+
+    public AbnormalEvent(LocalDateTime second,
+                         String vitalType,
+                         double value,
+                         AlarmLevel level) {
+        this.second = second;
+        this.vitalType = vitalType;
+        this.value = value;
+        this.level = level;
     }
 
-    public String getVitalName() {
-        return vitalName;
+    public String getSecondText() {
+        return second.format(SECOND_FORMAT);
     }
 
-    public double getValue() {
-        return value;
+    public String getVitalType() {
+        return vitalType;
+    }
+
+    public long getValue() {
+        return Math.round(value);
     }
 
     public AlarmLevel getLevel() {
         return level;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
     }
 }
