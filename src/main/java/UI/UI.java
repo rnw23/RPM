@@ -27,12 +27,11 @@ public class UI extends JFrame {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-
-    public void initialise(){
+    public void initialise() {
         patient = new Patient(1, "John Smith", 35);
 
         JFrame frame = new JFrame("Remote Patient Monitor");
-        frame.setSize(900,900);
+        frame.setSize(900, 900);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel mainPanel = new JPanel();
@@ -45,13 +44,13 @@ public class UI extends JFrame {
 
         frame.setContentPane(mainPanel);
         mainPanel.setLayout(new BorderLayout());
-        mainPanel.add(patientPanel,BorderLayout.NORTH);
-        mainPanel.add(vitalSignsPanel,BorderLayout.CENTER);
-        mainPanel.add(ECGPanel,BorderLayout.SOUTH);
+        mainPanel.add(patientPanel, BorderLayout.NORTH);
+        mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
+        mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
         //member virable changed
         bodyTemperaturePanel = new JPanel(new BorderLayout());
-        heartRatePanel =  new JPanel(new BorderLayout());
+        heartRatePanel = new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
         bloodPressurePanel = new JPanel(new BorderLayout());
 
@@ -69,7 +68,7 @@ public class UI extends JFrame {
         bloodPressurePanel.setBorder(BorderFactory.createTitledBorder("Blood Pressure (mmHg)"));
         ECGPanel.setBorder(BorderFactory.createTitledBorder("ECG"));
 
-        vitalSignsPanel.setLayout(new GridLayout(2,2));
+        vitalSignsPanel.setLayout(new GridLayout(2, 2));
 
         vitalSignsPanel.add(bodyTemperaturePanel);
         vitalSignsPanel.add(heartRatePanel);
@@ -77,8 +76,8 @@ public class UI extends JFrame {
         vitalSignsPanel.add(bloodPressurePanel);
 
         tempChart = new VitalSignPanel();
-        hrChart   = new VitalSignPanel();
-        rrChart   = new VitalSignPanel();
+        hrChart = new VitalSignPanel();
+        rrChart = new VitalSignPanel();
         bpChart = new BloodPressurePanel();
 
 
@@ -116,22 +115,22 @@ public class UI extends JFrame {
             bpChart.updateData(patient.getBloodPressureHistory());
 
             // >>>new; ALARM+COLOR+NOTIFY
-            var tList  = patient.getTemperatureHistory();
+            var tList = patient.getTemperatureHistory();
             var hrList = patient.getHeartRateHistory();
             var rrList = patient.getRespRateHistory();
             var bpList = patient.getBloodPressureHistory();
 
             if (!tList.isEmpty()) {
-                alarmManager.applyUIAndNotify(tList.get(tList.size()-1), bodyTemperaturePanel);
+                alarmManager.applyUIAndNotify(tList.get(tList.size() - 1), bodyTemperaturePanel);
             }
             if (!hrList.isEmpty()) {
-                alarmManager.applyUIAndNotify(hrList.get(hrList.size()-1), heartRatePanel);
+                alarmManager.applyUIAndNotify(hrList.get(hrList.size() - 1), heartRatePanel);
             }
             if (!rrList.isEmpty()) {
-                alarmManager.applyUIAndNotify(rrList.get(rrList.size()-1), respiratoryRatePanel);
+                alarmManager.applyUIAndNotify(rrList.get(rrList.size() - 1), respiratoryRatePanel);
             }
             if (!bpList.isEmpty()) {
-                alarmManager.applyUIAndNotify(bpList.get(bpList.size()-1), bloodPressurePanel);
+                alarmManager.applyUIAndNotify(bpList.get(bpList.size() - 1), bloodPressurePanel);
             }
             // >>>>>>>>
 
@@ -139,3 +138,4 @@ public class UI extends JFrame {
 
         timer.start();
     }
+}
