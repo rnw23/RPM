@@ -10,6 +10,7 @@ public class Patient {
     private int age;
     private String location;
     private String contact;
+    private int status;
     private ArrayList<HeartRate> HeartRateHistory;
     private ArrayList<BloodPressure> BloodPressureHistory;
     private ArrayList<RespRate> RespRateHistory;
@@ -17,18 +18,19 @@ public class Patient {
     private ArrayList<ECG> ECGHistory;
 
 
-    public Patient(int id, String name, int age, String location, String contact) {
+    public Patient(int id, String name, int age, String location, String contact, int status) {
         this.id = id;
         this.name = name;
         this.age = age;
         this.location = location;
         this.contact = contact;
+        this.status = status;
         this.HeartRateHistory = new ArrayList<>();
         this.BloodPressureHistory = new ArrayList<>();
         this.RespRateHistory = new ArrayList<>();
         this.TemperatureHistory = new ArrayList<>();
         this.ECGHistory = new ArrayList<>();
-        this.generator = new VitalSignsGenerator(1);
+        this.generator = new VitalSignsGenerator(status);
         updateVitals();
 
     }
@@ -56,6 +58,8 @@ public class Patient {
     public String getLocation() { return location; }
 
     public String getContact() { return contact; }
+
+    public int getStatus() {return status; }
 
     public HeartRate getHr() { return HeartRateHistory.get(HeartRateHistory.size() - 1); }
 

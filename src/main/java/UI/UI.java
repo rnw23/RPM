@@ -44,7 +44,7 @@ public class UI extends JFrame {
 
 
     public void initialise() {
-        patient = new Patient(1, "John Smith", 35, "Ward B", "123456789");
+        patient = new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1);
         patients = new PatientBase();
         selectedPatient = patients.getPatient(0);
 

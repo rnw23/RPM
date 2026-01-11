@@ -10,7 +10,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Patient p = new Patient(1, "John Smith", 35, "Ward B", "123456789");
+        Patient p = new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1);
 
         // ---------------------------
         // 1. Launch UI (EDT thread)

@@ -9,9 +9,9 @@ public class PatientBase {
 
     public PatientBase() {
         // Initial patients
-        patients.add(new Patient(1, "John Smith", 35, "Ward B", "1234567"));
-        patients.add(new Patient(2, "Alice Brown", 42, "Ward C", "1234567"));
-        patients.add(new Patient(3, "David Lee", 29, "Ward D", "1234566"));
+        patients.add(new Patient(1, "John Smith", 28, "Ward A", "01234567890", 0));
+        patients.add(new Patient(2, "Alice Brown", 35, "Ward B", "01234567891", 0));
+        patients.add(new Patient(3, "David Jones", 42, "Ward C", "01234567892", 1));
     }
 
     public List<Patient> getPatients() {
