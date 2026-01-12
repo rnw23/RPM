@@ -3,9 +3,11 @@ package RPM;
 import java.util.Random;
 
 public class VitalSignsGenerator {
-    private int abnormal;
-    private static final Random random = new Random();
+    //predefining all fields to be used later
+    private int abnormal; //used to describe if patient's displayed vital signs are relatively normal (0) or abnormal(1)
+    private static final Random random = new Random(); //required to randomise values later
 
+    //current values of vital signs, change at every iteration
     private double heartRate;
     private double respiratoryRate;
     private double bodyTemperature;
@@ -13,11 +15,14 @@ public class VitalSignsGenerator {
     private double diastolic;
     private double ecg;
 
+    //bounds within which the vital signs are being generated
     private int maxHR, minHR;
     private int maxRR, minRR;
     private double maxTemp, minTemp;
     private int maxSyst, minSyst;
+    //no bounds for diastolic because it's generated using systolic - 30 (plus noise)
 
+    //defining how much each vital sign can change in either direction from the baseline/previous value
     private int intervalHR;
     private int intervalRR;
     private double intervalTemp;
@@ -27,6 +32,7 @@ public class VitalSignsGenerator {
     public VitalSignsGenerator(int abnormal) {
         this.abnormal = abnormal;
 
+        //setting bounds for vital signs being generated based on if patient is described as normal or abnormal
         if (this.abnormal == 1) {
             this.maxHR = 130; this.minHR = 35;
             this.maxRR = 27;  this.minRR = 7;
@@ -39,14 +45,14 @@ public class VitalSignsGenerator {
             this.maxSyst = 135; this.minSyst = 95;
         }
 
-        // intervals (already improved)
+        // intervals (minimal because the values are changing every second so changes add up)
         intervalHR = 1;
         intervalRR = 1;
-        intervalTemp = 0.25;
+        intervalTemp = 0.25;  //(smaller interval since it changes more slowly
         intervalSyst = 3;
         intervalDia = 3;
 
-        // initial values
+        // randomly generating initial values
         this.bodyTemperature = randomDoubleInRange(minTemp, maxTemp);
         this.heartRate = randomIntInRange(minHR, maxHR);
         this.respiratoryRate = randomIntInRange(minRR, maxRR);
@@ -54,7 +60,16 @@ public class VitalSignsGenerator {
         this.diastolic = (this.systolic - 30) + randomIntInRange(-intervalDia, intervalDia);
         this.ecg = 0.0;
     }
+    //defining function to generate random integers in a given range, for HR,RR,BP
+    private static int randomIntInRange(int min, int max) {
+        return random.nextInt(max - min + 1) + min;
+    }
+    //defining function to generate random doubles for temperature
+    private static double randomDoubleInRange(double min, double max) {
+        return min + (max - min) * random.nextDouble();
+    }
 
+    //using random functions to generate a heart rate slightly above or below the earlier this.heartrate value
     public double generateHeartRate() {
         int delta = randomIntInRange(-intervalHR, intervalHR);
         int newVal = (int) heartRate + delta;
@@ -66,6 +81,7 @@ public class VitalSignsGenerator {
         return heartRate;
     }
 
+    //using same logic as heart rate for respiratory rate, temperature, systolic blood pressure
     public double generateRespiratoryRate() {
         int delta = randomIntInRange(-intervalRR, intervalRR);
         int newVal = (int) respiratoryRate + delta;
@@ -98,23 +114,17 @@ public class VitalSignsGenerator {
         systolic = newVal;
         return systolic;
     }
-
+    //generating diastolic values within interval using systolic-30 as baseline, avoiding the need for applying bounds and diastolic<systolic logics
     public double generateDiastolic() {
         int delta = randomIntInRange(-intervalDia, intervalDia);
         diastolic = (systolic - 30) + delta;
         return diastolic;
     }
-
+    //generating random values as a primitive proof of concept for displaying ecg values
     public double generateECG() {
         ecg = randomDoubleInRange(-1.0, 1.0);
         return ecg;
     }
 
-    private static int randomIntInRange(int min, int max) {
-        return random.nextInt(max - min + 1) + min;
-    }
 
-    private static double randomDoubleInRange(double min, double max) {
-        return min + (max - min) * random.nextDouble();
-    }
 }
