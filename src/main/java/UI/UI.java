@@ -7,12 +7,10 @@ import java.awt.event.FocusEvent;
 
 import Alarm.*;
 import RPM.*;
-import Report.PermanentRecord;
 
 public class UI extends JFrame {
 
     private final PatientBase patients;
-    private final PermanentRecord record;
     private Patient selectedPatient;
 
     private JComboBox<String> patientSelector;
@@ -42,9 +40,9 @@ public class UI extends JFrame {
     private final AlarmManager alarmManager = new AlarmManager();
     private boolean isEditingSettings = false;
 
-    public UI(PatientBase patients,  PermanentRecord record) {
+    public UI(PatientBase patients) {
         this.patients = patients;
-        this.record = record;    }
+    }
 
     public void initialise() {
 
@@ -240,16 +238,12 @@ public class UI extends JFrame {
 
         frame.setVisible(true);
         startLiveUpdates();
-        refreshCharts();
     }
 
     private void startLiveUpdates() {
         timer = new Timer(1000, e -> {
 
-            for (Patient p : patients.getPatients()) {
-                p.updateVitals();
-                if (record != null) record.recordLatest(p);
-            }
+            for (Patient p : patients.getPatients()) p.updateVitals();
 
             refreshCharts();
 
@@ -276,7 +270,7 @@ public class UI extends JFrame {
             }
 
             // update ECG plot once per second (no extra 33ms timer)
-            if (ecgHist != null) ecg.updateData(ecgHist);
+            ecg.updateData(ecgHist);
         });
 
         timer.start();

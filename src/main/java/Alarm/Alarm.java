@@ -34,8 +34,4 @@ public class Alarm {
     public LocalDateTime getDateTime() {
         return dateTime;
     }
-
-    public void sendNotification() {
-        System.out.println("🚨 ALARM: " + message);
-    }
 }

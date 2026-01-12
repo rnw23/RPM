@@ -10,8 +10,8 @@ public class AlarmEmailService {
 
     private final String smtpHost;
     private final int smtpPort;
-    private final String username;      // 发件邮箱
-    private final String appPassword;   // Gmail/Outlook 的 App Password（不是登录密码）
+    private final String username;
+    private final String appPassword;
     private final boolean useTls;
 
     public AlarmEmailService(String smtpHost, int smtpPort, String username, String appPassword, boolean useTls) {

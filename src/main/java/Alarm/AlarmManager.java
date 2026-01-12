@@ -53,7 +53,6 @@ public class AlarmManager {
         lastLevel.put(key, level);
 
         Alarm alarm = new Alarm(v);
-        alarm.sendNotification();
 
         if (level == AlarmLevel.RED && emailService != null) {
             LocalDateTime now = LocalDateTime.now();
