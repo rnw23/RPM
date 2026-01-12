@@ -7,41 +7,49 @@ import java.time.format.DateTimeFormatter;
 
 public class AbnormalEvent {
 
-    private static final DateTimeFormatter SECOND_FORMAT =
+    private static final DateTimeFormatter FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final LocalDateTime second;
     private final String vitalType;
-    private final double value;
     private final AlarmLevel level;
 
-    public AbnormalEvent(LocalDateTime second,
+    private final LocalDateTime start;
+    private LocalDateTime end;
+
+    private double minValue;
+    private double maxValue;
+
+    public AbnormalEvent(LocalDateTime start,
                          String vitalType,
-                         double value,
+                         double initialValue,
                          AlarmLevel level) {
-        this.second = second;
+        this.start = start;
+        this.end = start;
         this.vitalType = vitalType;
-        this.value = value;
         this.level = level;
+        this.minValue = initialValue;
+        this.maxValue = initialValue;
     }
 
-    public String getSecondText() {
-        return second.format(SECOND_FORMAT);
+    public void update(LocalDateTime time, double value) {
+        this.end = time;
+        this.minValue = Math.min(this.minValue, value);
+        this.maxValue = Math.max(this.maxValue, value);
     }
 
-    public LocalDateTime getSecond() {
-        return second;
+    public String getStartText() { return start.format(FORMAT); }
+    public String getEndText() { return end.format(FORMAT); }
+
+    public LocalDateTime getStart() { return start; }
+    public LocalDateTime getEnd() { return end; }
+
+    public String getVitalType() { return vitalType; }
+    public AlarmLevel getLevel() { return level; }
+
+    public String getValueRangeText() {
+        return String.format("%.1f - %.1f", minValue, maxValue);
     }
 
-    public String getVitalType() {
-        return vitalType;
-    }
-
-    public long getValue() {
-        return Math.round(value);
-    }
-
-    public AlarmLevel getLevel() {
-        return level;
-    }
+    public double getMinValue() { return minValue; }
+    public double getMaxValue() { return maxValue; }
 }

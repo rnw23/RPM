@@ -181,6 +181,8 @@ public class UI extends JPanel {
                     return;
                 }
 
+                target.finalizeCurrentMinute();
+
                 DailyReport report = new DailyReport(
                         target.getName(),
                         date,
@@ -285,6 +287,13 @@ public class UI extends JPanel {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 if (timer != null) timer.stop();
                 stopHeartbeat();
+
+                // IMPORTANT: finalize reporting data so it is not lost at shutdown
+                for (Patient p : patients.getPatients()) {
+                    try { p.finalizeCurrentMinute(); } catch (Exception ignored) {}
+                    try { p.finalizeOpenEpisodes(); } catch (Exception ignored) {}
+                }
+
                 alarmManager.closeAllDialogs();
             }
         });
@@ -303,6 +312,7 @@ public class UI extends JPanel {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
                 selectedPatient = patients.getPatient(index);
+                alarmManager.setCurrentPatientName(selectedPatient.getName());
                 patientInfo.updatePatient(selectedPatient);
                 refreshCharts();
             }

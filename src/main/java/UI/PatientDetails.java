@@ -6,7 +6,6 @@ import java.awt.*;
 import java.net.URL;
 
 import java.nio.file.Path;
-import java.nio.file.Files;
 
 public class PatientDetails extends JPanel {
     private Patient patient;
@@ -19,6 +18,7 @@ public class PatientDetails extends JPanel {
     private JLabel age;
     private JLabel location;
     private JLabel contact;
+    private JButton permBtn;
 
     public PatientDetails(Patient patient) {
         this.patient = patient;
@@ -58,23 +58,9 @@ public class PatientDetails extends JPanel {
         location = new JLabel("Location: " + patient.getLocation());
         contact = new JLabel("Contact: " + patient.getContact());
 
-        JButton permBtn = new JButton("Download Permanent Record");
-        permBtn.addActionListener(e -> {
-            try {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setSelectedFile(new java.io.File("permanentRecord_" + patient.getName() + ".xlsx"));
-
-                int result = chooser.showSaveDialog(this);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    Path dest = chooser.getSelectedFile().toPath();
-                    patient.getPermanentRecord().copyTo(dest);
-                    JOptionPane.showMessageDialog(this, "Saved: " + dest.toAbsolutePath());
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Failed to export permanent record.");
-            }
-        });
+        // Permanent record download button (REQUIRED)
+        permBtn = new JButton("Download Permanent Record");
+        permBtn.addActionListener(e -> exportPermanentRecord());
 
         rightPanel.add(location);
         rightPanel.add(contact);
@@ -93,6 +79,23 @@ public class PatientDetails extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
 
+    }
+
+    private void exportPermanentRecord() {
+        try {
+            JFileChooser chooser = new JFileChooser();
+            chooser.setSelectedFile(new java.io.File("permanentRecord_" + patient.getName() + ".xlsx"));
+
+            int result = chooser.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                Path dest = chooser.getSelectedFile().toPath();
+                patient.getPermanentRecord().copyTo(dest);
+                JOptionPane.showMessageDialog(this, "Saved: " + dest.toAbsolutePath());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to export permanent record.");
+        }
     }
 
     public void updatePatient(Patient newPatient) {
