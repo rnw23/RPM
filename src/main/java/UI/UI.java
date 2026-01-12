@@ -5,6 +5,11 @@ import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+import Report.DailyReport;
+
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+
 import Alarm.*;
 import RPM.*;
 
@@ -50,7 +55,7 @@ public class UI extends JFrame {
 
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         frame.setContentPane(mainPanel);
@@ -145,6 +150,51 @@ public class UI extends JFrame {
             );
 
             JOptionPane.showMessageDialog(frame, "Email settings applied.");
+        });
+
+        JButton dailyBtn = new JButton("Generate Daily Report");
+        selectorPanel.add(dailyBtn);
+
+        dailyBtn.addActionListener(e -> {
+            try {
+                String idText = JOptionPane.showInputDialog(frame, "Enter Patient ID:");
+                if (idText == null) return;
+                int pid = Integer.parseInt(idText.trim());
+
+                String dateText = JOptionPane.showInputDialog(frame, "Enter Date (YYYY-MM-DD):");
+                if (dateText == null) return;
+                LocalDate date = LocalDate.parse(dateText.trim());
+
+                Patient target = patients.findById(pid);
+                if (target == null) {
+                    JOptionPane.showMessageDialog(frame, "No patient found with ID " + pid);
+                    return;
+                }
+
+                DailyReport report = new DailyReport(
+                        target.getName(),
+                        date,
+                        target.getMinuteAveragesForDate(date),
+                        target.getAbnormalEventsForDate(date)
+                );
+
+                JFileChooser chooser = new JFileChooser();
+                chooser.setSelectedFile(new java.io.File(report.getFilePath().getFileName().toString()));
+                int result = chooser.showSaveDialog(frame);
+
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    java.nio.file.Files.copy(
+                            report.getFilePath(),
+                            chooser.getSelectedFile().toPath(),
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
+                    JOptionPane.showMessageDialog(frame, "Saved daily report.");
+                }
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Failed. Check Patient ID and date format (YYYY-MM-DD).");
+            }
         });
 
         topPanel.add(selectorPanel);

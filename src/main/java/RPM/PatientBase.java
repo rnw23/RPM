@@ -25,4 +25,11 @@ public class PatientBase {
     public int size() {
         return patients.size();
     }
+
+    public Patient findById(int id) {
+        for (Patient p : patients) {
+            if (p.getId() == id) return p;
+        }
+        return null;
+    }
 }

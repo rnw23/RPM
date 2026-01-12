@@ -5,6 +5,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 
+import java.nio.file.Path;
+import java.nio.file.Files;
+
 public class PatientDetails extends JPanel {
     private Patient patient;
     private JPanel leftPanel;
@@ -55,8 +58,27 @@ public class PatientDetails extends JPanel {
         location = new JLabel("Location: " + patient.getLocation());
         contact = new JLabel("Contact: " + patient.getContact());
 
+        JButton permBtn = new JButton("Download Permanent Record");
+        permBtn.addActionListener(e -> {
+            try {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setSelectedFile(new java.io.File("permanentRecord_" + patient.getName() + ".xlsx"));
+
+                int result = chooser.showSaveDialog(this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    Path dest = chooser.getSelectedFile().toPath();
+                    patient.getPermanentRecord().copyTo(dest);
+                    JOptionPane.showMessageDialog(this, "Saved: " + dest.toAbsolutePath());
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to export permanent record.");
+            }
+        });
+
         rightPanel.add(location);
         rightPanel.add(contact);
+        rightPanel.add(permBtn);
 
         add(leftPanel, BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);

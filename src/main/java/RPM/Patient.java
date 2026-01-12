@@ -1,6 +1,13 @@
 package RPM;
 
 import AllVitalSigns.*;
+import Report.*;
+import Alarm.AlarmLevel;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.ArrayList;
 
 public class Patient {
@@ -18,6 +25,16 @@ public class Patient {
     private ArrayList<Temperature> TemperatureHistory;
     private ArrayList<ECG> ECGHistory;
 
+    private final PermanentRecord permanentRecord;
+
+    private final ArrayList<MinuteAverage> minuteAverages = new ArrayList<>();
+    private final ArrayList<AbnormalEvent> abnormalEvents = new ArrayList<>();
+
+    // per-minute running sums
+    private int minuteCount = 0;
+    private double sumHr = 0, sumRr = 0, sumTemp = 0, sumSys = 0, sumDia = 0;
+    private LocalDateTime currentMinuteKey = null;
+
     public Patient(int id, String name, int age, String location, String contact, int status) {
         this.id = id;
         this.name = name;
@@ -33,17 +50,110 @@ public class Patient {
         this.ECGHistory = new ArrayList<>();
 
         this.generator = new VitalSignsGenerator(status);
+        this.permanentRecord = new PermanentRecord(this.name);
         updateVitals();
     }
 
     public void updateVitals() {
-        HeartRateHistory.add(new HeartRate(generator.generateHeartRate()));
+        HeartRate hr = new HeartRate(generator.generateHeartRate());
         double sys = generator.generateSystolic();
         double dia = generator.generateDiastolic();
-        BloodPressureHistory.add(new BloodPressure(sys, dia));
-        RespRateHistory.add(new RespRate(generator.generateRespiratoryRate()));
-        TemperatureHistory.add(new Temperature(generator.generateBodyTemperature()));
-        ECGHistory.add(new ECG(generator.generateECG()));
+        BloodPressure bp = new BloodPressure(sys, dia);
+        RespRate rr = new RespRate(generator.generateRespiratoryRate());
+        Temperature temp = new Temperature(generator.generateBodyTemperature());
+        ECG ecg = new ECG(generator.generateECG());
+
+        HeartRateHistory.add(hr);
+        BloodPressureHistory.add(bp);
+        RespRateHistory.add(rr);
+        TemperatureHistory.add(temp);
+        ECGHistory.add(ecg);
+
+        // 1) abnormal event logging (warning + urgent)
+        logIfAbnormal(hr);
+        logIfAbnormal(rr);
+        logIfAbnormal(temp);
+        logIfAbnormal(bp);
+        logIfAbnormal(ecg);
+
+        // 2) minute average logging (every minute based on timestamps)
+        updateMinuteAverages(hr, rr, temp, bp);
+    }
+
+    private void logIfAbnormal(AllVitalSigns.VitalSign v) {
+        AlarmLevel lvl = v.getAlarmLevel();
+        if (lvl == AlarmLevel.GREEN) return;
+
+        AbnormalEvent ev = new AbnormalEvent(
+                v.getDateTime(),
+                v.getClass().getSimpleName(),
+                v.getValue(),
+                lvl
+        );
+        abnormalEvents.add(ev);
+        permanentRecord.appendAbnormalEvent(ev);
+    }
+
+    private void updateMinuteAverages(HeartRate hr, RespRate rr, Temperature temp, BloodPressure bp) {
+
+        // bucket by minute
+        LocalDateTime nowMinute = hr.getDateTime().truncatedTo(ChronoUnit.MINUTES);
+
+        if (currentMinuteKey == null) {
+            currentMinuteKey = nowMinute;
+        }
+
+        // if minute rolled over, flush previous minute if we have samples
+        if (!nowMinute.equals(currentMinuteKey)) {
+            flushMinuteAverage();
+            // reset for new minute
+            currentMinuteKey = nowMinute;
+            minuteCount = 0;
+            sumHr = sumRr = sumTemp = sumSys = sumDia = 0;
+        }
+
+        // accumulate current second’s values
+        minuteCount++;
+        sumHr += hr.getValue();
+        sumRr += rr.getValue();
+        sumTemp += temp.getValue();
+        sumSys += bp.getSystole();
+        sumDia += bp.getDiastole();
+
+        // If you want strict "every minute" even if timestamps don’t roll
+        // you can also flush when minuteCount == 60, but truncTo(MINUTES) is cleaner.
+    }
+
+    private void flushMinuteAverage() {
+        if (minuteCount <= 0) return;
+
+        MinuteAverage ma = new MinuteAverage(
+                currentMinuteKey,
+                sumHr / minuteCount,
+                sumRr / minuteCount,
+                sumTemp / minuteCount,
+                sumSys / minuteCount,
+                sumDia / minuteCount
+        );
+
+        minuteAverages.add(ma);
+        permanentRecord.appendMinuteAverage(ma);
+    }
+
+    public List<MinuteAverage> getMinuteAveragesForDate(LocalDate date) {
+        ArrayList<MinuteAverage> out = new ArrayList<>();
+        for (MinuteAverage m : minuteAverages) {
+            if (m.getMinute().toLocalDate().equals(date)) out.add(m);
+        }
+        return out;
+    }
+
+    public List<AbnormalEvent> getAbnormalEventsForDate(LocalDate date) {
+        ArrayList<AbnormalEvent> out = new ArrayList<>();
+        for (AbnormalEvent e : abnormalEvents) {
+            if (e.getSecond().toLocalDate().equals(date)) out.add(e);
+        }
+        return out;
     }
 
     public int getId() { return id; }
@@ -65,6 +175,10 @@ public class Patient {
     public ArrayList<RespRate> getRespRateHistory() { return RespRateHistory; }
     public ArrayList<Temperature> getTemperatureHistory() { return TemperatureHistory; }
 
+    public PermanentRecord getPermanentRecord() { return permanentRecord; }
+    public List<MinuteAverage> getMinuteAverages() { return minuteAverages; }
+    public List<AbnormalEvent> getAbnormalEvents() { return abnormalEvents; }
+
     private <T> ArrayList<T> genArray(ArrayList<T> history, int sec) {
         ArrayList<T> result = new ArrayList<>();
         if (history == null || history.isEmpty() || sec <= 0) return result;
@@ -79,17 +193,4 @@ public class Patient {
     public ArrayList<BloodPressure> getBpArr(int sec) { return genArray(BloodPressureHistory, sec); }
     public ArrayList<RespRate> getRrArr(int sec) { return genArray(RespRateHistory, sec); }
     public ArrayList<Temperature> getTempArr(int sec) { return genArray(TemperatureHistory, sec); }
-    public ArrayList<ECG> getECGArr(int sec) { return genArray(ECGHistory, sec); }
-
-    public String PatientDisplay() {
-        return "RPM.Patient\n"
-                + "ID: " + getId() + "\n"
-                + "Name: " + getName() + "\n"
-                + "Age: " + getAge() + " years old\n"
-                + "Heart Rate: " + getHr().getValue() + " bpm\n"
-                + "Blood Pressure: " + getBp().getSystole() + "/" + getBp().getDiastole() + "\n"
-                + "Resp Rate: " + getRR().getValue() + " breaths/min\n"
-                + "Temperature: " + String.format("%.2f", getTemp().getValue()) + " °C\n"
-                + "ECG: " + String.format("%.2f", getECG().getVoltage()) + "\n";
-    }
 }

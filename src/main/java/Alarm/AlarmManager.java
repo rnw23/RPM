@@ -90,27 +90,23 @@ public class AlarmManager {
             JOptionPane op = vitalOptionPanes.get(key);
             op.setMessage(message);
 
-            // update title
             JDialog dialog = vitalDialogs.get(key);
             dialog.setTitle(title);
 
-            //front）
             dialog.toFront();
             dialog.repaint();
             return;
         }
 
-        //JDialog
         int msgType = (level == AlarmLevel.RED) ? JOptionPane.ERROR_MESSAGE : JOptionPane.WARNING_MESSAGE;
 
         JOptionPane optionPane = new JOptionPane(message, msgType);
         JDialog dialog = optionPane.createDialog(parent, title);
 
-        dialog.setModal(false); //random clods of display
+        dialog.setModal(false);
         dialog.setAlwaysOnTop(true);
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        //
         dialog.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosed(java.awt.event.WindowEvent e) {
@@ -134,11 +130,10 @@ public class AlarmManager {
         vitalOptionPanes.remove(key);
     }
 
-    //for ui not sure but work
     public void closeDialogForVital(String vitalKey) {
         closeVitalDialog(vitalKey);
     }
-    // === close all alarm diaglog ===
+
     public void closeAllDialogs() {
         //avoid ConcurrentModification
         for (JDialog d : vitalDialogs.values()) {
