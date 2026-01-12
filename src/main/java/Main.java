@@ -1,4 +1,5 @@
 import Report.DailyReport;
+import Report.PermanentRecord;
 import RPM.Patient;
 import RPM.PatientBase;
 import UI.UI;
@@ -17,8 +18,11 @@ public class Main {
         base.addPatient(new Patient(3, "David Jones", 42, "Ward C", "01234567892", 1));
         base.addPatient(new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1));
 
-        SwingUtilities.invokeLater(() -> new UI(base).initialise());
+        PermanentRecord record = new PermanentRecord();
 
+        SwingUtilities.invokeLater(() -> new UI(base, record).initialise());
+
+        // report thread (example: after 60 seconds)
         new Thread(() -> {
             try {
                 Thread.sleep(60_000);
@@ -26,10 +30,11 @@ public class Main {
                 Patient reportPatient = base.getPatient(0);
                 if (reportPatient == null) return;
 
-                DailyReport report = new DailyReport(reportPatient);
+                LocalDate today = LocalDate.now();
 
-                String date = LocalDate.now()
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                DailyReport report = new DailyReport(record, reportPatient, today);
+
+                String date = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                 String safeName = reportPatient.getName()
                         .trim()
@@ -44,6 +49,6 @@ public class Main {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        }, "ReportThread").start();
     }
 }

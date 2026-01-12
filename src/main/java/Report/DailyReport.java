@@ -1,110 +1,24 @@
 package Report;
 
-import Alarm.AlarmLevel;
-import AllVitalSigns.*;
 import RPM.Patient;
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.List;
 
 public class DailyReport {
 
-    private final List<MinuteAverage> minuteAverages = new ArrayList<>();
-    private final List<AbnormalEvent> abnormalEvents = new ArrayList<>();
+    private final List<MinuteAverage> minuteAverages;
+    private final List<AbnormalEvent> abnormalEvents;
 
-    public DailyReport(Patient patient) {
-        buildMinuteAverages(patient);
-        buildAbnormalEvents(patient);
+    public DailyReport(PermanentRecord record, Patient patient, LocalDate date) {
+        this.minuteAverages = record.getMinuteAverages(patient.getId(), date);
+        this.abnormalEvents = record.getAbnormalEvents(patient.getId(), date);
     }
-
-    /* -------------------- Sheet 1: Vital signs average per minute -------------------- */
-
-    private void buildMinuteAverages(Patient patient) {
-
-        Map<LocalDateTime, MinuteAccumulator> perMinute = new TreeMap<>();
-
-        addHeartRate(perMinute, patient.getHeartRateHistory());
-        addRespRate(perMinute, patient.getRespRateHistory());
-        addTemperature(perMinute, patient.getTemperatureHistory());
-        addBloodPressure(perMinute, patient.getBloodPressureHistory());
-
-        for (Map.Entry<LocalDateTime, MinuteAccumulator> entry : perMinute.entrySet()) {
-            LocalDateTime minute = entry.getKey();
-            MinuteAccumulator acc = entry.getValue();
-
-            minuteAverages.add(new MinuteAverage(
-                    minute,
-                    acc.avgHR(),
-                    acc.avgRR(),
-                    acc.avgTemp(),
-                    acc.avgSys(),
-                    acc.avgDia()
-            ));
-        }
-    }
-
-    private void addHeartRate(Map<LocalDateTime, MinuteAccumulator> perMinute, List<HeartRate> history) {
-        for (HeartRate v : history) {
-            LocalDateTime key = v.getDateTime().truncatedTo(ChronoUnit.MINUTES);
-            perMinute.computeIfAbsent(key, k -> new MinuteAccumulator()).addHR(v.getValue());
-        }
-    }
-
-    private void addRespRate(Map<LocalDateTime, MinuteAccumulator> perMinute, List<RespRate> history) {
-        for (RespRate v : history) {
-            LocalDateTime key = v.getDateTime().truncatedTo(ChronoUnit.MINUTES);
-            perMinute.computeIfAbsent(key, k -> new MinuteAccumulator()).addRR(v.getValue());
-        }
-    }
-
-    private void addTemperature(Map<LocalDateTime, MinuteAccumulator> perMinute, List<Temperature> history) {
-        for (Temperature v : history) {
-            LocalDateTime key = v.getDateTime().truncatedTo(ChronoUnit.MINUTES);
-            perMinute.computeIfAbsent(key, k -> new MinuteAccumulator()).addTemp(v.getValue());
-        }
-    }
-
-    private void addBloodPressure(Map<LocalDateTime, MinuteAccumulator> perMinute, List<BloodPressure> history) {
-        for (BloodPressure v : history) {
-            LocalDateTime key = v.getDateTime().truncatedTo(ChronoUnit.MINUTES);
-            perMinute.computeIfAbsent(key, k -> new MinuteAccumulator()).addBP(v.getSystole(), v.getDiastole());
-        }
-    }
-
-    /* -------------------- Sheet 2: Abnormal events (EVERY abnormal reading, chronological) -------------------- */
-
-    private void buildAbnormalEvents(Patient patient) {
-
-        List<VitalSign> all = new ArrayList<>();
-        all.addAll(patient.getHeartRateHistory());
-        all.addAll(patient.getRespRateHistory());
-        all.addAll(patient.getTemperatureHistory());
-        all.addAll(patient.getBloodPressureHistory());
-        all.addAll(patient.getECGHistory()); // ECG now extends VitalSign
-
-        all.sort(Comparator.comparing(VitalSign::getDateTime));
-
-        for (VitalSign v : all) {
-            AlarmLevel level = v.getAlarmLevel();
-            if (level == AlarmLevel.GREEN) continue;
-
-            abnormalEvents.add(new AbnormalEvent(
-                    v.getDateTime(),                      // keep seconds
-                    v.getClass().getSimpleName(),
-                    v.getValue(),
-                    level
-            ));
-        }
-    }
-
-    /* -------------------- Excel export -------------------- */
 
     public void exportExcel(String filename) throws Exception {
 
@@ -163,26 +77,5 @@ public class DailyReport {
         }
 
         for (int i = 0; i <= 3; i++) sheet.autoSizeColumn(i);
-    }
-
-    /* -------------------- Helper accumulator -------------------- */
-
-    private static class MinuteAccumulator {
-        private double hrSum = 0;   private int hrCount = 0;
-        private double rrSum = 0;   private int rrCount = 0;
-        private double tSum  = 0;   private int tCount  = 0;
-        private double sysSum = 0;  private int bpCount = 0;
-        private double diaSum = 0;
-
-        void addHR(double v) { hrSum += v; hrCount++; }
-        void addRR(double v) { rrSum += v; rrCount++; }
-        void addTemp(double v) { tSum += v; tCount++; }
-        void addBP(double sys, double dia) { sysSum += sys; diaSum += dia; bpCount++; }
-
-        double avgHR() { return hrCount == 0 ? 0 : hrSum / hrCount; }
-        double avgRR() { return rrCount == 0 ? 0 : rrSum / rrCount; }
-        double avgTemp() { return tCount == 0 ? 0 : tSum / tCount; }
-        double avgSys() { return bpCount == 0 ? 0 : sysSum / bpCount; }
-        double avgDia() { return bpCount == 0 ? 0 : diaSum / bpCount; }
     }
 }

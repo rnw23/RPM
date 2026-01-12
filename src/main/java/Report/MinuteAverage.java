@@ -33,6 +33,10 @@ public class MinuteAverage {
         return minute.format(MINUTE_FORMAT);
     }
 
+    public LocalDateTime getMinute() {
+        return minute;
+    }
+
     public long getAvgHeartRate() {
         return Math.round(avgHeartRate);
     }

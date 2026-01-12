@@ -29,6 +29,10 @@ public class AbnormalEvent {
         return second.format(SECOND_FORMAT);
     }
 
+    public LocalDateTime getSecond() {
+        return second;
+    }
+
     public String getVitalType() {
         return vitalType;
     }
