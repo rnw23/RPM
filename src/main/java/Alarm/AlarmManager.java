@@ -17,6 +17,14 @@ public class AlarmManager {
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
 
     private String recipientEmail = "your@email.com";
+    //patient to email
+    private String currentPatientName = "Unknown";
+
+    public void setCurrentPatientName(String name) {
+        if (name == null) return;
+        name = name.trim();
+        if (!name.isEmpty()) this.currentPatientName = name;
+    }
 
     private final Duration emailCooldown = Duration.ofSeconds(10);
     private final Map<String, LocalDateTime> lastEmailSent = new HashMap<>();
@@ -61,8 +69,8 @@ public class AlarmManager {
             boolean inCooldown = (last != null) && Duration.between(last, now).compareTo(emailCooldown) < 0;
 
             if (!inCooldown) {
-                String subject = "RED ALARM: " + key + " (" + level + ")";
-                String body = alarm.getMessage();
+                String subject = "RED ALARM: " + currentPatientName + " - " + key + " (" + level + ")";
+                String body = "Patient: " + currentPatientName + "\n" + alarm.getMessage();
 
                 new Thread(() -> emailService.sendEmail(recipientEmail, subject, body), "AlarmEmail-" + key).start();
                 lastEmailSent.put(key, now);
@@ -85,40 +93,92 @@ public class AlarmManager {
 
     private void showOrUpdateVitalDialog(String key, Component parent, String title, String message, AlarmLevel level) {
 
+        // Jdialog exisit but be covered
+        if (vitalDialogs.containsKey(key)) {
+            JDialog d = vitalDialogs.get(key);
+            JLabel label = (JLabel) d.getContentPane().getComponent(0);
+            label.setText(toHtmlSmall(message));
 
-        if (vitalDialogs.containsKey(key) && vitalOptionPanes.containsKey(key)) {
-            JOptionPane op = vitalOptionPanes.get(key);
-            op.setMessage(message);
-
-            JDialog dialog = vitalDialogs.get(key);
-            dialog.setTitle(title);
-
-            dialog.toFront();
-            dialog.repaint();
+            d.pack();
+            positionTopRightInPanel(d, parent);
+            d.setVisible(true);
+            d.toFront();
             return;
         }
 
-        int msgType = (level == AlarmLevel.RED) ? JOptionPane.ERROR_MESSAGE : JOptionPane.WARNING_MESSAGE;
-
-        JOptionPane optionPane = new JOptionPane(message, msgType);
-        JDialog dialog = optionPane.createDialog(parent, title);
-
-        dialog.setModal(false);
+        //small toast dialog
+        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent));
+        dialog.setUndecorated(true);         //no big frame
         dialog.setAlwaysOnTop(true);
-        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialog.setModal(false);
 
-        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosed(java.awt.event.WindowEvent e) {
-                vitalDialogs.remove(key);
-                vitalOptionPanes.remove(key);
-            }
-        });
+        JLabel label = new JLabel(toHtmlSmall(message));
+        label.setFont(label.getFont().deriveFont(11f));  //smaller texte
+        label.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+
+        //bg color of dialog
+        Color bg = switch (level) {
+            case RED -> new Color(255, 220, 220);
+            case AMBER -> new Color(255, 245, 210);
+            default -> new Color(230, 255, 230);
+        };
+        label.setOpaque(true);
+        label.setBackground(bg);
+        label.setForeground(Color.DARK_GRAY);
+
+        dialog.getContentPane().add(label);
+        dialog.pack();
+        positionTopRightInPanel(dialog, parent);
+        dialog.setVisible(true);
 
         vitalDialogs.put(key, dialog);
-        vitalOptionPanes.put(key, optionPane);
 
-        dialog.setVisible(true);
+        //optional disapper 2s
+        //new javax.swing.Timer(2000, e -> closeVitalDialog(key)) {{
+        //setRepeats(false);
+        // start();
+        // }};
+    }
+
+    private void positionTopRightInPanel(JDialog dialog, Component parent) {
+        if (parent == null) return;
+        try {
+            Point p = parent.getLocationOnScreen();  // panel 左上角(屏幕坐标)
+            int margin = 8;
+
+            int x = p.x + parent.getWidth() - dialog.getWidth() - margin;
+            int y = p.y + margin;
+
+            dialog.setLocation(x, y);
+        } catch (IllegalComponentStateException ignored) {
+
+        }
+    }
+
+    private String toHtmlSmall(String msg) {
+        //changfe the line auto
+        return "<html><div style='width:220px;'>" + msg.replace("\n", "<br>") + "</div></html>";
+    }
+
+    private void positionTopRight(JDialog dialog, Window owner, String key) {
+        if (owner == null) return;
+
+        try {
+            Point p = owner.getLocationOnScreen();
+
+            int marginRight = 16;
+            int marginTop = 60;
+            int gapY = 10;
+
+            //tp avoid overlap
+            int slot = Math.floorMod(key.hashCode(), 4); //max 4
+            int x = p.x + owner.getWidth() - dialog.getWidth() - marginRight;
+            int y = p.y + marginTop + slot * (dialog.getHeight() + gapY);
+
+            dialog.setLocation(x, y);
+        } catch (IllegalComponentStateException ignored) {
+
+        }
     }
 
     private void closeVitalDialog(String key) {

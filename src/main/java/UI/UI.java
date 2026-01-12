@@ -52,6 +52,8 @@ public class UI extends JFrame {
     public void initialise() {
 
         selectedPatient = patients.getPatient(0);
+        alarmManager.setCurrentPatientName(selectedPatient.getName());
+
 
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
@@ -142,7 +144,7 @@ public class UI extends JFrame {
             alarmManager.setRecipientEmail(to);
 
             alarmManager.configureEmail(
-                    "smtp.office365.com",
+                    "smtp.gmail.com",
                     587,
                     sender,
                     appPwd,
