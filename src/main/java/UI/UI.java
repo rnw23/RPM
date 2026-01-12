@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 
 import Report.DailyReport;
 
@@ -13,7 +15,7 @@ import java.time.LocalDate;
 import Alarm.*;
 import RPM.*;
 
-public class UI extends JFrame {
+public class UI extends JPanel {
 
     private final PatientBase patients;
     private Patient selectedPatient;
@@ -45,8 +47,11 @@ public class UI extends JFrame {
     private final AlarmManager alarmManager = new AlarmManager();
     private boolean isEditingSettings = false;
 
+    private JPanel mainPanel;
+
     public UI(PatientBase patients) {
         this.patients = patients;
+        initialise();
     }
 
     public void initialise() {
@@ -54,13 +59,15 @@ public class UI extends JFrame {
         selectedPatient = patients.getPatient(0);
         alarmManager.setCurrentPatientName(selectedPatient.getName());
 
+        //JFrame frame = new JFrame("Remote Patient Monitor");
+        //frame.setSize(900, 900);
+        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JFrame frame = new JFrame("Remote Patient Monitor");
-        frame.setSize(900, 900);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //mainPanel = new JPanel(new BorderLayout());
+        //setContentPane(mainPanel);
 
-        JPanel mainPanel = new JPanel(new BorderLayout());
-        frame.setContentPane(mainPanel);
+        setLayout(new BorderLayout());
+        mainPanel = this; // optional, or remove mainPanel entirely
 
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -151,7 +158,8 @@ public class UI extends JFrame {
                     true
             );
 
-            JOptionPane.showMessageDialog(frame, "Email settings applied.");
+            //frame
+            JOptionPane.showMessageDialog(UI.this, "Email settings applied.");
         });
 
         JButton dailyBtn = new JButton("Generate Daily Report");
@@ -159,17 +167,17 @@ public class UI extends JFrame {
 
         dailyBtn.addActionListener(e -> {
             try {
-                String idText = JOptionPane.showInputDialog(frame, "Enter Patient ID:");
+                String idText = JOptionPane.showInputDialog(UI.this, "Enter Patient ID:");
                 if (idText == null) return;
                 int pid = Integer.parseInt(idText.trim());
 
-                String dateText = JOptionPane.showInputDialog(frame, "Enter Date (YYYY-MM-DD):");
+                String dateText = JOptionPane.showInputDialog(UI.this, "Enter Date (YYYY-MM-DD):");
                 if (dateText == null) return;
                 LocalDate date = LocalDate.parse(dateText.trim());
 
                 Patient target = patients.findById(pid);
                 if (target == null) {
-                    JOptionPane.showMessageDialog(frame, "No patient found with ID " + pid);
+                    JOptionPane.showMessageDialog(UI.this, "No patient found with ID " + pid);
                     return;
                 }
 
@@ -182,7 +190,7 @@ public class UI extends JFrame {
 
                 JFileChooser chooser = new JFileChooser();
                 chooser.setSelectedFile(new java.io.File(report.getFilePath().getFileName().toString()));
-                int result = chooser.showSaveDialog(frame);
+                int result = chooser.showSaveDialog(UI.this);
 
                 if (result == JFileChooser.APPROVE_OPTION) {
                     java.nio.file.Files.copy(
@@ -190,12 +198,12 @@ public class UI extends JFrame {
                             chooser.getSelectedFile().toPath(),
                             StandardCopyOption.REPLACE_EXISTING
                     );
-                    JOptionPane.showMessageDialog(frame, "Saved daily report.");
+                    JOptionPane.showMessageDialog(UI.this, "Saved daily report.");
                 }
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(frame, "Failed. Check Patient ID and date format (YYYY-MM-DD).");
+                JOptionPane.showMessageDialog(UI.this, "Failed. Check Patient ID and date format (YYYY-MM-DD).");
             }
         });
 
@@ -270,9 +278,21 @@ public class UI extends JFrame {
         });
 
         // close handling
-        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+        //frame
+        /*
+        addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
+                if (timer != null) timer.stop();
+                stopHeartbeat();
+                alarmManager.closeAllDialogs();
+            }
+        });
+
+         */
+
+        addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.DISPLAYABILITY_CHANGED) != 0 && !isDisplayable()) {
                 if (timer != null) timer.stop();
                 stopHeartbeat();
                 alarmManager.closeAllDialogs();
@@ -288,8 +308,13 @@ public class UI extends JFrame {
             }
         });
 
-        frame.setVisible(true);
+        //frame.setVisible(true);
+        //alarmManager.setParentComponent(this);
         startLiveUpdates();
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 
     private void startLiveUpdates() {

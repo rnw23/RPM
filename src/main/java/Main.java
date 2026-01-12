@@ -1,6 +1,6 @@
 import RPM.Patient;
 import RPM.PatientBase;
-import UI.UI;
+import UI.App;
 
 import javax.swing.*;
 
@@ -14,6 +14,7 @@ public class Main {
         base.addPatient(new Patient(3, "David Jones", 42, "Ward C", "01234567892", 1));
         base.addPatient(new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1));
 
-        SwingUtilities.invokeLater(() -> new UI(base).initialise());
+        SwingUtilities.invokeLater(() -> new App(base).setVisible(true));
+
     }
 }
