@@ -1,5 +1,6 @@
 import Report.DailyReport;
-import RPM.*;
+import RPM.Patient;
+import RPM.PatientBase;
 import UI.UI;
 
 import javax.swing.*;
@@ -10,45 +11,32 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Patient p = new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1);
+        PatientBase base = new PatientBase();
+        base.addPatient(new Patient(1, "John Smith", 28, "Ward A", "01234567890", 0));
+        base.addPatient(new Patient(2, "Alice Brown", 35, "Ward B", "01234567891", 0));
+        base.addPatient(new Patient(3, "David Jones", 42, "Ward C", "01234567892", 1));
+        base.addPatient(new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1));
 
-        // ---------------------------
-        // 1. Launch UI (EDT thread)
-        // ---------------------------
-        SwingUtilities.invokeLater(() -> {
-            new UI().initialise();
-        });
+        SwingUtilities.invokeLater(() -> new UI(base).initialise());
 
-        // ---------------------------
-        // 2. Run testing in background thread
-        // ---------------------------
         new Thread(() -> {
             try {
-                PatientBase database = new PatientBase();
-                Patient p1 = database.getPatient(0);   // test first patient
+                Thread.sleep(60_000);
 
-                // Simulate 60 seconds of data
-                for (int i = 0; i < 60; i++) {
-                    p.updateVitals();
-                    System.out.println(p.PatientDisplay());
-                    Thread.sleep(1000);
-                }
+                Patient reportPatient = base.getPatient(0);
+                if (reportPatient == null) return;
 
-                // ---------------------------
-                // 3. Generate Daily Report
-                // ---------------------------
-                DailyReport report = new DailyReport(p);
+                DailyReport report = new DailyReport(reportPatient);
 
                 String date = LocalDate.now()
                         .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-                String safeName = p.getName()
+                String safeName = reportPatient.getName()
                         .trim()
                         .replaceAll("\\s+", "_")
                         .replaceAll("[^a-zA-Z0-9_\\-]", "");
 
                 String filename = "DailyReport_" + date + "_" + safeName + ".xlsx";
-
                 report.exportExcel(filename);
 
                 System.out.println("Daily report generated successfully: " + filename);
@@ -59,20 +47,3 @@ public class Main {
         }).start();
     }
 }
-
-/* ----- testing Listener -----
-    public static void main(String[] args) {
-
-        RPM.VitalSignsGenerator simulator = new RPM.VitalSignsGenerator();
-
-        AlarmLevel alarm = new AlarmLevel();
-        UI.UI ui = new UI.UI();
-        DatabaseRepository repo = new DatabaseRepository();
-
-        simulator.addListener(alarm);
-        simulator.addListener(ui);
-        simulator.addListener(repo);
-
-        simulator.start();
-    }
- */

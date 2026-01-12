@@ -20,6 +20,11 @@ public class BloodPressurePanel extends JPanel {
         repaint();
     }
 
+    public void setMaxPoints(int maxPoints) {
+        this.maxPoints = Math.max(2, maxPoints);
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -33,9 +38,7 @@ public class BloodPressurePanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
 
-//        g2.drawString("Blood Pressure (Systolic/Diastolic)", 10, 20);
-
-        int size = Math.min(data.size(), 30);
+        int size = Math.min(data.size(), maxPoints);
         int start = data.size() - size;
 
         int min = 50;
@@ -58,7 +61,6 @@ public class BloodPressurePanel extends JPanel {
             g2.drawString(String.format("%.0f", value), 5, y + 5);
         }
 
-
         int xTicks = 6;
         for (int i = 0; i <= xTicks; i++) {
             int x = x0 + i * (x1 - x0) / xTicks;
@@ -67,7 +69,6 @@ public class BloodPressurePanel extends JPanel {
             g2.drawLine(x, y0 - 5, x, y0 + 5);
             g2.drawString(seconds + "s", x - 10, y0 + 20);
         }
-
 
         g2.setStroke(new BasicStroke(3f));
         g2.setColor(Color.RED);
@@ -82,7 +83,6 @@ public class BloodPressurePanel extends JPanel {
         g2.drawString("Diastolic", w - 120, 35);
     }
 
-
     private void drawLineSeries(Graphics2D g2, List<BloodPressure> data,
                                 int start, int size,
                                 int x0, int x1,
@@ -92,11 +92,10 @@ public class BloodPressurePanel extends JPanel {
 
         int prevX = x0;
         double prevValue = systolic ? data.get(start).getSystole() : data.get(start).getDiastole();
-
         int prevY = scale(prevValue, min, max, h);
 
         for (int i = 1; i < size; i++) {
-            int x = x0 + i * (x1 - x0) / size;
+            int x = x0 + i * (x1 - x0) / Math.max(1, (size - 1));
 
             double value = systolic
                     ? data.get(start + i).getSystole()

@@ -11,13 +11,26 @@ public class VitalSignPanel extends JPanel {
     private int maxPoints = 30;
     private final int PAD = 40;
 
+    private Double fixedMin = null;
+    private Double fixedMax = null;
+
     public VitalSignPanel() {
-//        this.title = title;
         setPreferredSize(new Dimension(350, 250));
     }
 
     public void updateData(List<? extends VitalSign> data) {
         this.data = data;
+        repaint();
+    }
+
+    public void setMaxPoints(int maxPoints) {
+        this.maxPoints = Math.max(2, maxPoints);
+        repaint();
+    }
+
+    public void setFixedRange(double min, double max) {
+        this.fixedMin = min;
+        this.fixedMax = max;
         repaint();
     }
 
@@ -34,9 +47,6 @@ public class VitalSignPanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
 
-        // ---- Title ----
-//        g2.drawString(title, 10, 20);
-
         int size = Math.min(data.size(), maxPoints);
         int start = data.size() - size;
 
@@ -49,7 +59,10 @@ public class VitalSignPanel extends JPanel {
             max = Math.max(max, v);
         }
 
-        if (max - min < 0.01) {
+        if (fixedMin != null && fixedMax != null) {
+            min = fixedMin;
+            max = fixedMax;
+        } else if (max - min < 0.01) {
             max += 1;
             min -= 1;
         }
@@ -59,8 +72,8 @@ public class VitalSignPanel extends JPanel {
         int x1 = w - PAD;
         int y1 = PAD;
 
-        g2.drawLine(x0, y0, x1, y0);   // X axis
-        g2.drawLine(x0, y0, x0, y1);   // Y axis
+        g2.drawLine(x0, y0, x1, y0);
+        g2.drawLine(x0, y0, x0, y1);
 
         int yTicks = 5;
         for (int i = 0; i <= yTicks; i++) {
@@ -71,8 +84,7 @@ public class VitalSignPanel extends JPanel {
             g2.drawString(String.format("%.1f", value), 5, y + 5);
         }
 
-
-        int xTicks = 5; // same as yTicks
+        int xTicks = 5;
         for (int i = 0; i <= xTicks; i++) {
             int x = x0 + i * (x1 - x0) / xTicks;
             int seconds = i * (maxPoints / xTicks);
@@ -87,7 +99,7 @@ public class VitalSignPanel extends JPanel {
         int prevY = scale(data.get(start).getValue(), min, max, h);
 
         for (int i = 1; i < size; i++) {
-            int x = x0 + i * (x1 - x0) / size;
+            int x = x0 + i * (x1 - x0) / Math.max(1, (size - 1));
             int y = scale(data.get(start + i).getValue(), min, max, h);
 
             g2.drawLine(prevX, prevY, x, y);
@@ -96,7 +108,6 @@ public class VitalSignPanel extends JPanel {
             prevY = y;
         }
     }
-
 
     private int scale(double value, double min, double max, int height) {
         double normalized = (value - min) / (max - min);

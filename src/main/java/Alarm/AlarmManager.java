@@ -1,6 +1,8 @@
 package Alarm;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
+
 import AllVitalSigns.VitalSign;
 
 import javax.swing.*;
@@ -10,19 +12,15 @@ import java.util.Map;
 
 public class AlarmManager {
 
-    // record every signal from last signal
     private final Map<String, AlarmLevel> lastLevel = new HashMap<>();
-
-    // one notify every signal
     private final Map<String, JDialog> vitalDialogs = new HashMap<>();
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
 
-    private String recipientEmail = "your@email.com"; // 默认，UI 可改
+    private String recipientEmail = "your@email.com";
 
     private final Duration emailCooldown = Duration.ofSeconds(10);
     private final Map<String, LocalDateTime> lastEmailSent = new HashMap<>();
 
-    // wait UI to get SMTP
     private AlarmEmailService emailService = null;
 
 
@@ -40,27 +38,23 @@ public class AlarmManager {
         AlarmLevel level = v.getAlarmLevel();
         String key = v.getClass().getSimpleName();
 
-        // 1)
         setPanelColour(panel, level);
 
-        // 2) GREEN
         if (level == AlarmLevel.GREEN) {
             lastLevel.put(key, level);
             closeVitalDialog(key);
             return;
         }
 
-        // 3) level changes but not updated
         AlarmLevel previous = lastLevel.get(key);
         if (previous != null && previous == level) {
             return;
         }
         lastLevel.put(key, level);
 
-        // 4)alarm info
         Alarm alarm = new Alarm(v);
         alarm.sendNotification();
-        // only red send email
+
         if (level == AlarmLevel.RED && emailService != null) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime last = lastEmailSent.get(key);
@@ -71,15 +65,14 @@ public class AlarmManager {
                 String subject = "RED ALARM: " + key + " (" + level + ")";
                 String body = alarm.getMessage();
 
-                emailService.sendEmail(recipientEmail, subject, body);
+                new Thread(() -> emailService.sendEmail(recipientEmail, subject, body), "AlarmEmail-" + key).start();
                 lastEmailSent.put(key, now);
             }
         }
 
-        // 5) one vital one notify
         SwingUtilities.invokeLater(() -> {
             if (level == AlarmLevel.RED) {
-                Toolkit.getDefaultToolkit().beep(); // 只对 RED 响，避免 AMBER 烦
+                Toolkit.getDefaultToolkit().beep();
             }
             showOrUpdateVitalDialog(
                     key,

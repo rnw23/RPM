@@ -2,22 +2,24 @@ package UI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 import Alarm.*;
 import RPM.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+
 public class UI extends JFrame {
 
-    private PatientBase patients;
+    private final PatientBase patients;
     private Patient selectedPatient;
-    private Patient patient;
+
     private JComboBox<String> patientSelector;
     private Timer timer;
+
     private JSlider windowSlider;
     private JLabel windowLabel;
-    private int windowSec = 10; // default
+    private int windowSec = 10;
+
     private PatientDetails patientInfo;
 
     private VitalSignPanel tempChart;
@@ -26,67 +28,61 @@ public class UI extends JFrame {
     private BloodPressurePanel bpChart;
     private ECGplot ecg;
 
-    //new added
     private JPanel bodyTemperaturePanel;
     private JPanel heartRatePanel;
     private JPanel respiratoryRatePanel;
     private JPanel bloodPressurePanel;
     private JPanel ECGPanel;
-    private JPanel patientPanel;
 
     private JToggleButton heartbeatToggle;
+    private Timer heartbeatTimer;
 
-    //alarm manager
     private final AlarmManager alarmManager = new AlarmManager();
     private boolean isEditingSettings = false;
 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+    public UI(PatientBase patients) {
+        this.patients = patients;
+    }
 
     public void initialise() {
-        patient = new Patient(4, "Jennifer Baker", 49, "Ward D", "01234567893", 1);
-        patients = new PatientBase();
-        selectedPatient = patients.getPatient(0);
 
+        selectedPatient = patients.getPatient(0);
 
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel mainPanel = new JPanel();
-        JPanel patientPanel = new JPanel();
-        JPanel selectorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JPanel vitalSignsPanel = new JPanel();
-        JPanel topPanel = new JPanel();
-        ECGPanel = new JPanel();
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        frame.setContentPane(mainPanel);
 
+        JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+
+        JPanel patientPanel = new JPanel();
         patientPanel.setPreferredSize(new Dimension(900, 120));
         patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
-        patientPanel.setPreferredSize(new Dimension(900, 80));
-        selectorPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40)); // small height
+
+        JPanel selectorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        selectorPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
         selectorPanel.setPreferredSize(new Dimension(900, 40));
 
-        ECGPanel.setPreferredSize(new Dimension(900, 150));
-        ECGPanel.setLayout(new BorderLayout());
+        JPanel vitalSignsPanel = new JPanel(new GridLayout(2, 2));
 
-        frame.setContentPane(mainPanel);
-        mainPanel.setLayout(new BorderLayout());
+        ECGPanel = new JPanel(new BorderLayout());
+        ECGPanel.setPreferredSize(new Dimension(900, 150));
+
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
         mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
+        // ---- patient selector ----
         patientSelector = new JComboBox<>();
-
-        for (Patient p : patients.getPatients()) {
-            patientSelector.addItem(p.getName());
-
-        }
+        for (Patient p : patients.getPatients()) patientSelector.addItem(p.getName());
 
         selectorPanel.add(new JLabel("Select Patient: "));
         selectorPanel.add(patientSelector);
 
-        //input by nurse of email
+        // ---- email settings ----
         selectorPanel.add(new JLabel("Alert To: "));
         JTextField toField = new JTextField("your@outlook.com", 18);
         selectorPanel.add(toField);
@@ -99,45 +95,38 @@ public class UI extends JFrame {
         JPasswordField pwdField = new JPasswordField(16);
         selectorPanel.add(pwdField);
 
-        //N slides
-
         windowLabel = new JLabel("Window: 10s");
         selectorPanel.add(windowLabel);
 
-        windowSlider = new JSlider(5, 60, 10); // min=5s max=60s default=10s
+        windowSlider = new JSlider(5, 60, 10);
         windowSlider.setMajorTickSpacing(5);
         windowSlider.setPaintTicks(true);
-
         selectorPanel.add(windowSlider);
 
         windowSlider.addChangeListener(e -> {
             windowSec = windowSlider.getValue();
             windowLabel.setText("Window: " + windowSec + "s");
 
-            // refresch immediately
+            tempChart.setMaxPoints(windowSec);
+            hrChart.setMaxPoints(windowSec);
+            rrChart.setMaxPoints(windowSec);
+            bpChart.setMaxPoints(windowSec);
+
             refreshCharts();
         });
 
-        // ---- prevent alarm popups from interrupting nurse input ----
-        toField.addFocusListener(new FocusAdapter() {
+        // prevent alarm popups from interrupting nurse input
+        FocusAdapter focusGuard = new FocusAdapter() {
             @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
             @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
-        });
-
-        senderField.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
-            @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
-        });
-
-        pwdField.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { isEditingSettings = true; }
-            @Override public void focusLost(FocusEvent e) { isEditingSettings = false; }
-        });
+        };
+        toField.addFocusListener(focusGuard);
+        senderField.addFocusListener(focusGuard);
+        pwdField.addFocusListener(focusGuard);
 
         JButton applyEmailBtn = new JButton("Apply Email");
         selectorPanel.add(applyEmailBtn);
 
-// ser defalut email sender
         alarmManager.setRecipientEmail(toField.getText());
 
         applyEmailBtn.addActionListener(e -> {
@@ -147,7 +136,6 @@ public class UI extends JFrame {
 
             alarmManager.setRecipientEmail(to);
 
-            // outlook SMTP:
             alarmManager.configureEmail(
                     "smtp.office365.com",
                     587,
@@ -158,28 +146,25 @@ public class UI extends JFrame {
 
             JOptionPane.showMessageDialog(frame, "Email settings applied.");
         });
-        //done
 
-        selectorPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         topPanel.add(selectorPanel);
         topPanel.add(patientPanel);
-        patientInfo = new PatientDetails(selectedPatient);
-        patientPanel.add(patientInfo, BorderLayout.CENTER);
 
-        //member variable changed
+        patientInfo = new PatientDetails(selectedPatient);
+        patientPanel.add(patientInfo);
+
+        // ---- charts ----
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
         bloodPressurePanel = new JPanel(new BorderLayout());
 
-        //background color
         bodyTemperaturePanel.setOpaque(true);
         heartRatePanel.setOpaque(true);
         respiratoryRatePanel.setOpaque(true);
         bloodPressurePanel.setOpaque(true);
         ECGPanel.setOpaque(true);
 
-        // labelling
         patientPanel.setBorder(BorderFactory.createTitledBorder("Patient Details"));
         bodyTemperaturePanel.setBorder(BorderFactory.createTitledBorder("Body Temperature (°C)"));
         heartRatePanel.setBorder(BorderFactory.createTitledBorder("Heart Rate (bpm)"));
@@ -187,7 +172,6 @@ public class UI extends JFrame {
         bloodPressurePanel.setBorder(BorderFactory.createTitledBorder("Blood Pressure (mmHg)"));
         ECGPanel.setBorder(BorderFactory.createTitledBorder("ECG"));
 
-        vitalSignsPanel.setLayout(new GridLayout(2, 2));
         vitalSignsPanel.add(bodyTemperaturePanel);
         vitalSignsPanel.add(heartRatePanel);
         vitalSignsPanel.add(respiratoryRatePanel);
@@ -199,12 +183,14 @@ public class UI extends JFrame {
         bpChart = new BloodPressurePanel();
         ecg = new ECGplot();
 
-        ecg = new ECGplot();
-        ecg.setTimeWindowSeconds(10);
-        ecg.setSamplesPerSecond(100);
-        ecg.setVoltageRange(1.0); // because your generator is -1..1
+        hrChart.setFixedRange(30, 130);
+        rrChart.setFixedRange(5, 30);
+        tempChart.setFixedRange(34, 40);
 
-        //ECGPanel.add(ecg, BorderLayout.CENTER);
+        tempChart.setMaxPoints(windowSec);
+        hrChart.setMaxPoints(windowSec);
+        rrChart.setMaxPoints(windowSec);
+        bpChart.setMaxPoints(windowSec);
 
         bodyTemperaturePanel.add(tempChart, BorderLayout.CENTER);
         heartRatePanel.add(hrChart, BorderLayout.CENTER);
@@ -218,25 +204,26 @@ public class UI extends JFrame {
         bpChart.setOpaque(false);
         ecg.setOpaque(false);
 
-        // Add heartbeat toggle button
         heartbeatToggle = new JToggleButton("Heartbeat Sound OFF");
         heartRatePanel.add(heartbeatToggle, BorderLayout.SOUTH);
 
         heartbeatToggle.addActionListener(e -> {
             if (heartbeatToggle.isSelected()) {
-                heartbeatToggle.setText("Heartbeat Sound OFF");
-            } else {
                 heartbeatToggle.setText("Heartbeat Sound ON");
+                startHeartbeat();
+            } else {
+                heartbeatToggle.setText("Heartbeat Sound OFF");
+                stopHeartbeat();
             }
         });
 
-
-        // >>> ADD: when closing the main window, stop updates + close all alarm dialogs
+        // close handling
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
-                if (timer != null) timer.stop();          // stop generating alarms
-                alarmManager.closeAllDialogs();           // close any open alarm popups
+                if (timer != null) timer.stop();
+                stopHeartbeat();
+                alarmManager.closeAllDialogs();
             }
         });
 
@@ -244,39 +231,27 @@ public class UI extends JFrame {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
                 selectedPatient = patients.getPatient(index);
-
-                // Refresh charts immediately
-                tempChart.updateData(selectedPatient.getTemperatureHistory());
-                hrChart.updateData(selectedPatient.getHeartRateHistory());
-                rrChart.updateData(selectedPatient.getRespRateHistory());
-                bpChart.updateData(selectedPatient.getBloodPressureHistory());
-
                 patientInfo.updatePatient(selectedPatient);
+                refreshCharts();
             }
         });
-
 
         frame.setVisible(true);
         startLiveUpdates();
     }
 
     private void startLiveUpdates() {
-
         timer = new Timer(1000, e -> {
-            for (Patient p : patients.getPatients()) {
-                p.updateVitals();    // all patients continue generating data
-            }
+
+            for (Patient p : patients.getPatients()) p.updateVitals();
 
             refreshCharts();
 
-
-
-            // >>>new; ALARM+COLOR+NOTIFY
             var tList = selectedPatient.getTemperatureHistory();
             var hrList = selectedPatient.getHeartRateHistory();
             var rrList = selectedPatient.getRespRateHistory();
             var bpList = selectedPatient.getBloodPressureHistory();
-
+            var ecgHist = selectedPatient.getECGHistory();
 
             if (!isEditingSettings && !tList.isEmpty()) {
                 alarmManager.applyUIAndNotify(tList.get(tList.size() - 1), bodyTemperaturePanel);
@@ -290,38 +265,17 @@ public class UI extends JFrame {
             if (!isEditingSettings && !bpList.isEmpty()) {
                 alarmManager.applyUIAndNotify(bpList.get(bpList.size() - 1), bloodPressurePanel);
             }
-
-
-
-
-            if (heartbeatToggle.isSelected()) {
-                double currentHR = selectedPatient.getHr().getValue(); // bpm
-                int interval = (int)(60000 / currentHR);          // ms between beats
-                new Thread(() -> {
-                    Heartbeat.playThump(300, 80); // your current tone
-                    try {
-                        Thread.sleep(interval);
-                    } catch (InterruptedException ex) { }
-                }).start();
-            }
-            else{
-
-            }
-
-        });
-
-        new Timer(33, e -> {
-            var ecgHist = selectedPatient.getECGHistory();
-            ecg.updateData(ecgHist);
-
             if (!isEditingSettings && !ecgHist.isEmpty()) {
-                var latest = ecgHist.get(ecgHist.size() - 1);
-                alarmManager.applyUIAndNotify(latest, ECGPanel);
+                alarmManager.applyUIAndNotify(ecgHist.get(ecgHist.size() - 1), ECGPanel);
             }
-        }).start();
+
+            // update ECG plot once per second (no extra 33ms timer)
+            ecg.updateData(ecgHist);
+        });
 
         timer.start();
     }
+
     private void refreshCharts() {
         tempChart.updateData(selectedPatient.getTempArr(windowSec));
         hrChart.updateData(selectedPatient.getHrArr(windowSec));
@@ -329,5 +283,29 @@ public class UI extends JFrame {
         bpChart.updateData(selectedPatient.getBpArr(windowSec));
     }
 
+    private void startHeartbeat() {
+        stopHeartbeat();
 
+        heartbeatTimer = new Timer(600, evt -> {
+            if (!heartbeatToggle.isSelected() || selectedPatient == null) return;
+
+            double hr = selectedPatient.getHr().getValue();
+            int interval = (int) Math.max(250, Math.min(2000, 60000.0 / Math.max(1.0, hr)));
+
+            // play sound in background (tiny, controlled thread)
+            new Thread(() -> Heartbeat.playThump(300, 80), "Heartbeat").start();
+
+            heartbeatTimer.setDelay(interval);
+        });
+
+        heartbeatTimer.setRepeats(true);
+        heartbeatTimer.start();
+    }
+
+    private void stopHeartbeat() {
+        if (heartbeatTimer != null) {
+            heartbeatTimer.stop();
+            heartbeatTimer = null;
+        }
+    }
 }

@@ -78,48 +78,29 @@ public class DailyReport {
         }
     }
 
-    /* -------------------- Sheet 2: Abnormal events (time-based, chronological) -------------------- */
+    /* -------------------- Sheet 2: Abnormal events (EVERY abnormal reading, chronological) -------------------- */
 
     private void buildAbnormalEvents(Patient patient) {
-
-        // record only when a vital's alarm level changes into AMBER/RED (concise)
-        Map<String, AlarmLevel> lastLevelByVital = new HashMap<>();
 
         List<VitalSign> all = new ArrayList<>();
         all.addAll(patient.getHeartRateHistory());
         all.addAll(patient.getRespRateHistory());
         all.addAll(patient.getTemperatureHistory());
         all.addAll(patient.getBloodPressureHistory());
+        all.addAll(patient.getECGHistory()); // ECG now extends VitalSign
 
-        // time-based ordering
         all.sort(Comparator.comparing(VitalSign::getDateTime));
 
         for (VitalSign v : all) {
-
             AlarmLevel level = v.getAlarmLevel();
-            String vitalType = v.getClass().getSimpleName();
-            AlarmLevel prev = lastLevelByVital.get(vitalType);
+            if (level == AlarmLevel.GREEN) continue;
 
-            // GREEN: update state only, do not log
-            if (level == AlarmLevel.GREEN) {
-                lastLevelByVital.put(vitalType, AlarmLevel.GREEN);
-                continue;
-            }
-
-            // same non-green level as last time: skip
-            if (prev != null && prev == level) {
-                continue;
-            }
-
-            // Keep full timestamp (seconds) for abnormal events sheet
             abnormalEvents.add(new AbnormalEvent(
-                    v.getDateTime(),
-                    vitalType,
+                    v.getDateTime(),                      // keep seconds
+                    v.getClass().getSimpleName(),
                     v.getValue(),
                     level
             ));
-
-            lastLevelByVital.put(vitalType, level);
         }
     }
 

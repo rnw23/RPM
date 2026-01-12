@@ -1,7 +1,6 @@
 package Alarm;
 
 import AllVitalSigns.VitalSign;
-
 import java.time.LocalDateTime;
 
 public class Alarm {
@@ -19,16 +18,14 @@ public class Alarm {
 
     private String buildMessage() {
         return String.format(
-                " | Vital: %s | Value: %.1f | Level: %s",
+                "| Vital: %s | Value: %.1f | Level: %s |",
                 vitalSign.getClass().getSimpleName(),
                 vitalSign.getValue(),
                 alarmLevel
         );
     }
 
-    public AlarmLevel getAlarmLevel() {
-        return alarmLevel;
-    }
+    public AlarmLevel getAlarmLevel() { return alarmLevel; }
 
     public String getMessage() {
         return message;
@@ -38,9 +35,7 @@ public class Alarm {
         return dateTime;
     }
 
-    // UML method
     public void sendNotification() {
         System.out.println("🚨 ALARM: " + message);
-        // Later you can connect email / sound here
     }
 }
