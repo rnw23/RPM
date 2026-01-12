@@ -283,6 +283,7 @@ public class UI extends JFrame {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
                 selectedPatient = patients.getPatient(index);
+                alarmManager.setCurrentPatientName(selectedPatient.getName());
                 patientInfo.updatePatient(selectedPatient);
                 refreshCharts();
             }
