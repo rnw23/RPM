@@ -173,6 +173,8 @@ public class UI extends JFrame {
                     return;
                 }
 
+                target.finalizeCurrentMinute();
+
                 DailyReport report = new DailyReport(
                         target.getName(),
                         date,
@@ -275,6 +277,13 @@ public class UI extends JFrame {
             public void windowClosing(java.awt.event.WindowEvent e) {
                 if (timer != null) timer.stop();
                 stopHeartbeat();
+
+                // IMPORTANT: finalize reporting data so it is not lost at shutdown
+                for (Patient p : patients.getPatients()) {
+                    try { p.finalizeCurrentMinute(); } catch (Exception ignored) {}
+                    try { p.finalizeOpenEpisodes(); } catch (Exception ignored) {}
+                }
+
                 alarmManager.closeAllDialogs();
             }
         });

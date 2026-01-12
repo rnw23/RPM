@@ -32,10 +32,11 @@ public abstract class Report {
 
         // Sheet 2: Abnormal Events
         Row h2 = abnormalSheet.createRow(0);
-        h2.createCell(0).setCellValue("Date and Time");
-        h2.createCell(1).setCellValue("Vital Type");
-        h2.createCell(2).setCellValue("Value");
-        h2.createCell(3).setCellValue("Level");
+        h2.createCell(0).setCellValue("Start Date and Time");
+        h2.createCell(1).setCellValue("End Date and Time");
+        h2.createCell(2).setCellValue("Vital Type");
+        h2.createCell(3).setCellValue("Value Range (Min-Max)");
+        h2.createCell(4).setCellValue("Level");
     }
 
     protected static int nextRowIndex(Sheet sheet) {

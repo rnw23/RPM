@@ -1,7 +1,6 @@
 package Report;
 
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -52,10 +51,11 @@ public class PermanentRecord extends Report {
     public synchronized void appendAbnormalEvent(AbnormalEvent e) {
         int r = nextRowIndex(abnormalSheet);
         Row row = abnormalSheet.createRow(r);
-        row.createCell(0).setCellValue(e.getSecondText());
-        row.createCell(1).setCellValue(e.getVitalType());
-        row.createCell(2).setCellValue(e.getValue());
-        row.createCell(3).setCellValue(e.getLevel().name());
+        row.createCell(0).setCellValue(e.getStartText());
+        row.createCell(1).setCellValue(e.getEndText());
+        row.createCell(2).setCellValue(e.getVitalType());
+        row.createCell(3).setCellValue(e.getValueRangeText());
+        row.createCell(4).setCellValue(e.getLevel().name());
 
         saveToDisk();
     }

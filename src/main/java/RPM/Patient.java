@@ -29,6 +29,7 @@ public class Patient {
 
     private final ArrayList<MinuteAverage> minuteAverages = new ArrayList<>();
     private final ArrayList<AbnormalEvent> abnormalEvents = new ArrayList<>();
+    private final java.util.Map<String, AbnormalEvent> openEpisodes = new java.util.HashMap<>();
 
     // per-minute running sums
     private int minuteCount = 0;
@@ -70,29 +71,77 @@ public class Patient {
         ECGHistory.add(ecg);
 
         // 1) abnormal event logging (warning + urgent)
-        logIfAbnormal(hr);
-        logIfAbnormal(rr);
-        logIfAbnormal(temp);
-        logIfAbnormal(bp);
-        logIfAbnormal(ecg);
+        processAbnormalEpisode(hr);
+        processAbnormalEpisode(rr);
+        processAbnormalEpisode(temp);
+        processAbnormalEpisode(bp);
+        processAbnormalEpisode(ecg);
 
         // 2) minute average logging (every minute based on timestamps)
         updateMinuteAverages(hr, rr, temp, bp);
     }
 
-    private void logIfAbnormal(AllVitalSigns.VitalSign v) {
-        AlarmLevel lvl = v.getAlarmLevel();
-        if (lvl == AlarmLevel.GREEN) return;
+    private void processAbnormalEpisode(AllVitalSigns.VitalSign v) {
+        String key = v.getClass().getSimpleName();
+        AlarmLevel level = v.getAlarmLevel();
+        LocalDateTime t = v.getDateTime();
+        double value = v.getValue();
 
-        AbnormalEvent ev = new AbnormalEvent(
-                v.getDateTime(),
-                v.getClass().getSimpleName(),
-                v.getValue(),
-                lvl
-        );
-        abnormalEvents.add(ev);
-        permanentRecord.appendAbnormalEvent(ev);
+        AbnormalEvent open = openEpisodes.get(key);
+
+        // If GREEN: close any open episode
+        if (level == AlarmLevel.GREEN) {
+            if (open != null) {
+                closeEpisode(key, open);
+            }
+            return;
+        }
+
+        // AMBER/RED: open or extend episode
+        if (open == null) {
+            // start new episode
+            AbnormalEvent ev = new AbnormalEvent(t, key, value, level);
+            openEpisodes.put(key, ev);
+            return;
+        }
+
+        // If level changed (AMBER<->RED), close previous and start new
+        if (open.getLevel() != level) {
+            closeEpisode(key, open);
+            AbnormalEvent ev = new AbnormalEvent(t, key, value, level);
+            openEpisodes.put(key, ev);
+            return;
+        }
+
+        // Same level: extend and update min/max
+        open.update(t, value);
     }
+
+    private void closeEpisode(String key, AbnormalEvent ev) {
+        // store in patient lists for daily report filtering
+        abnormalEvents.add(ev);
+
+        // persist into permanent record file
+        permanentRecord.appendAbnormalEvent(ev);
+
+        // remove from open episodes
+        openEpisodes.remove(key);
+    }
+
+    public void finalizeOpenEpisodes() {
+        for (String key : new java.util.ArrayList<>(openEpisodes.keySet())) {
+            AbnormalEvent ev = openEpisodes.get(key);
+            if (ev != null) closeEpisode(key, ev);
+        }
+    }
+
+    public void finalizeCurrentMinute() {
+        flushMinuteAverage();
+        // prevent double-flush if called multiple times
+        minuteCount = 0;
+        sumHr = sumRr = sumTemp = sumSys = sumDia = 0;
+    }
+
 
     private void updateMinuteAverages(HeartRate hr, RespRate rr, Temperature temp, BloodPressure bp) {
 
@@ -151,7 +200,11 @@ public class Patient {
     public List<AbnormalEvent> getAbnormalEventsForDate(LocalDate date) {
         ArrayList<AbnormalEvent> out = new ArrayList<>();
         for (AbnormalEvent e : abnormalEvents) {
-            if (e.getSecond().toLocalDate().equals(date)) out.add(e);
+            LocalDate startD = e.getStart().toLocalDate();
+            LocalDate endD = e.getEnd().toLocalDate();
+
+            boolean overlaps = (!date.isBefore(startD)) && (!date.isAfter(endD));
+            if (overlaps) out.add(e);
         }
         return out;
     }
@@ -176,8 +229,6 @@ public class Patient {
     public ArrayList<Temperature> getTemperatureHistory() { return TemperatureHistory; }
 
     public PermanentRecord getPermanentRecord() { return permanentRecord; }
-    public List<MinuteAverage> getMinuteAverages() { return minuteAverages; }
-    public List<AbnormalEvent> getAbnormalEvents() { return abnormalEvents; }
 
     private <T> ArrayList<T> genArray(ArrayList<T> history, int sec) {
         ArrayList<T> result = new ArrayList<>();
