@@ -19,6 +19,7 @@ public class Patient {
     private String contact;
     private int status;
 
+    //stores patient vital sign history
     private ArrayList<HeartRate> HeartRateHistory;
     private ArrayList<BloodPressure> BloodPressureHistory;
     private ArrayList<RespRate> RespRateHistory;

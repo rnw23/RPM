@@ -13,20 +13,25 @@ import java.time.LocalDate;
 import Alarm.*;
 import RPM.*;
 
+/**
+ * UI class handling patient selection, vital sign plotting, ECG display, heartbeat audio, and alarm notifications.
+ */
 public class UI extends JFrame {
 
-    private final PatientBase patients;
-    private Patient selectedPatient;
+    private final PatientBase patients;  //patient database
+    private Patient selectedPatient;  //currently selected patient to display
 
-    private JComboBox<String> patientSelector;
-    private Timer timer;
 
+    /**ui components*/
+    private JComboBox<String> patientSelector;  //dropdown to switch displaying patients
+    private PatientDetails patientInfo;  //show patient info
+
+    //control for display duration (display last n seconds)
     private JSlider windowSlider;
     private JLabel windowLabel;
     private int windowSec = 10;
 
-    private PatientDetails patientInfo;
-
+    //vital sign chart panels
     private VitalSignPanel tempChart;
     private VitalSignPanel hrChart;
     private VitalSignPanel rrChart;
@@ -39,22 +44,30 @@ public class UI extends JFrame {
     private JPanel bloodPressurePanel;
     private JPanel ECGPanel;
 
-    private JToggleButton heartbeatToggle;
-    private Timer heartbeatTimer;
+
+    private JToggleButton heartbeatToggle; //toggle heartbeat sound
+    private Timer heartbeatTimer; //timer for heartbeat sound
+
+    private Timer timer; //live update timer
 
     private final AlarmManager alarmManager = new AlarmManager();
-    private boolean isEditingSettings = false;
+    private boolean isEditingSettings = false; //prevent alarms while editing
 
+
+
+    //Constructor receives the patient database.
     public UI(PatientBase patients) {
         this.patients = patients;
     }
 
+    //initialise main GUI components and event listeners
     public void initialise() {
 
+        //display first patient by default
         selectedPatient = patients.getPatient(0);
         alarmManager.setCurrentPatientName(selectedPatient.getName());
 
-
+        //main frame
         JFrame frame = new JFrame("Remote Patient Monitor");
         frame.setSize(900, 900);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -62,54 +75,67 @@ public class UI extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout());
         frame.setContentPane(mainPanel);
 
+        /**top panel (selector + patient info)*/
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
-        JPanel patientPanel = new JPanel();
-        patientPanel.setPreferredSize(new Dimension(900, 120));
-        patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
-
+        //selector (patient, email setting, n second slider
         JPanel selectorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         selectorPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
         selectorPanel.setPreferredSize(new Dimension(900, 40));
 
+        //patient info
+        JPanel patientPanel = new JPanel();
+        patientPanel.setPreferredSize(new Dimension(900, 120));
+        patientPanel.setLayout(new BoxLayout(patientPanel, BoxLayout.Y_AXIS));
+        patientInfo = new PatientDetails(selectedPatient);
+        patientPanel.add(patientInfo);
+
+        //add selector and patient info to top panel
+        topPanel.add(selectorPanel);
+        topPanel.add(patientPanel);
+
+
+        //vital signs panel in 2x2 grid
         JPanel vitalSignsPanel = new JPanel(new GridLayout(2, 2));
 
+        //ecg panel
         ECGPanel = new JPanel(new BorderLayout());
         ECGPanel.setPreferredSize(new Dimension(900, 150));
 
+        //display top to bottom: patient selector, patient info, vital signs, ecg
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
         mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
-        // ---- patient selector ----
+
+        //form selector panel
+        // patient selector
         patientSelector = new JComboBox<>();
         for (Patient p : patients.getPatients()) patientSelector.addItem(p.getName());
-
         selectorPanel.add(new JLabel("Select Patient: "));
         selectorPanel.add(patientSelector);
 
-        // ---- email settings ----
+        // email settings selector
         selectorPanel.add(new JLabel("Alert To: "));
         JTextField toField = new JTextField("your@outlook.com", 18);
         selectorPanel.add(toField);
-
         selectorPanel.add(new JLabel("Sender: "));
         JTextField senderField = new JTextField("your@outlook.com", 18);
         selectorPanel.add(senderField);
-
         selectorPanel.add(new JLabel("AppPwd: "));
         JPasswordField pwdField = new JPasswordField(16);
         selectorPanel.add(pwdField);
 
+        //slider selector for n second display
         windowLabel = new JLabel("Window: 10s");
         selectorPanel.add(windowLabel);
-
         windowSlider = new JSlider(5, 60, 10);
         windowSlider.setMajorTickSpacing(5);
         windowSlider.setPaintTicks(true);
         selectorPanel.add(windowSlider);
 
+        //update chart window duration
         windowSlider.addChangeListener(e -> {
             windowSec = windowSlider.getValue();
             windowLabel.setText("Window: " + windowSec + "s");
@@ -131,6 +157,7 @@ public class UI extends JFrame {
         senderField.addFocusListener(focusGuard);
         pwdField.addFocusListener(focusGuard);
 
+        //apply email settings
         JButton applyEmailBtn = new JButton("Apply Email");
         selectorPanel.add(applyEmailBtn);
 
@@ -154,6 +181,8 @@ public class UI extends JFrame {
             JOptionPane.showMessageDialog(frame, "Email settings applied.");
         });
 
+
+        //generate daily report
         JButton dailyBtn = new JButton("Generate Daily Report");
         selectorPanel.add(dailyBtn);
 
@@ -201,13 +230,9 @@ public class UI extends JFrame {
             }
         });
 
-        topPanel.add(selectorPanel);
-        topPanel.add(patientPanel);
 
-        patientInfo = new PatientDetails(selectedPatient);
-        patientPanel.add(patientInfo);
 
-        // ---- charts ----
+        // vital sign charts
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
@@ -258,6 +283,8 @@ public class UI extends JFrame {
         bpChart.setOpaque(false);
         ecg.setOpaque(false);
 
+
+        //heartbeat toggle
         heartbeatToggle = new JToggleButton("Heartbeat Sound OFF");
         heartRatePanel.add(heartbeatToggle, BorderLayout.SOUTH);
 
@@ -271,7 +298,7 @@ public class UI extends JFrame {
             }
         });
 
-        // close handling
+        // close handling to stop timers and alarms
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent e) {
@@ -288,6 +315,8 @@ public class UI extends JFrame {
             }
         });
 
+
+        //update patient selection
         patientSelector.addActionListener(e -> {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
@@ -302,11 +331,11 @@ public class UI extends JFrame {
         startLiveUpdates();
     }
 
+    //timer for vital sign and alarm live updates
     private void startLiveUpdates() {
         timer = new Timer(1000, e -> {
 
             for (Patient p : patients.getPatients()) p.updateVitals();
-
             refreshCharts();
 
             var tList = selectedPatient.getTemperatureHistory();
@@ -338,6 +367,7 @@ public class UI extends JFrame {
         timer.start();
     }
 
+    //refresh chart panels with latest patient data
     private void refreshCharts() {
         tempChart.updateData(selectedPatient.getTempArr(windowSec));
         hrChart.updateData(selectedPatient.getHrArr(windowSec));
@@ -345,6 +375,7 @@ public class UI extends JFrame {
         bpChart.updateData(selectedPatient.getBpArr(windowSec));
     }
 
+    //start heartbeat timer
     private void startHeartbeat() {
         stopHeartbeat();
 
@@ -364,6 +395,7 @@ public class UI extends JFrame {
         heartbeatTimer.start();
     }
 
+    //stop heartbeat timer
     private void stopHeartbeat() {
         if (heartbeatTimer != null) {
             heartbeatTimer.stop();
