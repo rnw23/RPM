@@ -17,7 +17,7 @@ public class AlarmManager {
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
 
     private String recipientEmail = "your@email.com";
-    //patient to email
+    //name of current patient name to be included
     private String currentPatientName = "Unknown";
 
     public void setCurrentPatientName(String name) {
@@ -25,12 +25,11 @@ public class AlarmManager {
         name = name.trim();
         if (!name.isEmpty()) this.currentPatientName = name;
     }
-
+    //Cooldown to prevent repeated same email alerts
     private final Duration emailCooldown = Duration.ofSeconds(10);
     private final Map<String, LocalDateTime> lastEmailSent = new HashMap<>();
 
     private AlarmEmailService emailService = null;
-
 
     public void configureEmail(String smtpHost, int smtpPort, String senderEmail, String appPassword, boolean useTls) {
         this.emailService = new AlarmEmailService(smtpHost, smtpPort, senderEmail, appPassword, useTls);
@@ -222,7 +221,7 @@ public class AlarmManager {
     private void positionTopRightInPanel(JDialog dialog, Component parent) {
         if (parent == null) return;
         try {
-            Point p = parent.getLocationOnScreen();  // panel 左上角(屏幕坐标)
+            Point p = parent.getLocationOnScreen();
             int margin = 8;
 
             int x = p.x + parent.getWidth() - dialog.getWidth() - margin;
