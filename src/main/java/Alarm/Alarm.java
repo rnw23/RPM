@@ -8,6 +8,7 @@ public class Alarm {
     private AlarmLevel alarmLevel;
     private String message;
     private LocalDateTime dateTime;
+    private static volatile boolean uiAlarmPopupsEnabled = false;
 
     public Alarm(VitalSign vitalSign) {
         this.vitalSign = vitalSign;
@@ -34,4 +35,14 @@ public class Alarm {
     public LocalDateTime getDateTime() {
         return dateTime;
     }
+
+    // Global UI gate: allow alarms to be computed, but block alarm UI popups
+    public static void setUiAlarmPopupsEnabled(boolean enabled) {
+        uiAlarmPopupsEnabled = enabled;
+    }
+
+    public static boolean isUiAlarmPopupsEnabled() {
+        return uiAlarmPopupsEnabled;
+    }
+
 }

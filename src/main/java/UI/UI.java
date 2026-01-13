@@ -308,6 +308,16 @@ public class UI extends JPanel {
             }
         });
 
+        /*addHierarchyListener(e -> {
+            if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && isShowing()) {
+                if (timer == null || !timer.isRunning()) {
+                    startLiveUpdates();
+                }
+            }
+        });
+
+         */
+
         patientSelector.addActionListener(e -> {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
@@ -395,4 +405,20 @@ public class UI extends JPanel {
             heartbeatTimer = null;
         }
     }
+    /*
+    public void startMonitoring() {
+        if (timer != null && timer.isRunning()) return;
+
+        timer = new Timer(1000, e -> {
+            // update vitals
+            // alarmManager.applyUIAndNotify(...)
+        });
+        timer.start();
+    }
+
+    public void stopMonitoring() {
+        if (timer != null) timer.stop();
+    }
+    */
+
 }

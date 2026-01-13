@@ -54,10 +54,29 @@ public class AlarmManager {
             return;
         }
 
+        /*
         AlarmLevel previous = lastLevel.get(key);
         if (previous != null && previous == level) {
             return;
         }
+
+         */
+
+        AlarmLevel previous = lastLevel.get(key);
+        if (previous != null && previous == level) {
+
+            if (Alarm.isUiAlarmPopupsEnabled()) {
+                JDialog d = vitalDialogs.get(key);   // your map of dialogs
+                if (d == null || !d.isVisible()) {
+                    // fall through (do NOT return)
+                } else {
+                    return; // already showing
+                }
+            } else {
+                return; // popups disabled, ignore repeats
+            }
+        }
+
         lastLevel.put(key, level);
 
         Alarm alarm = new Alarm(v);
@@ -77,6 +96,12 @@ public class AlarmManager {
             }
         }
 
+        if (!Alarm.isUiAlarmPopupsEnabled()) {
+            return;
+        }
+
+        //setPanelColour(panel, level);
+
         SwingUtilities.invokeLater(() -> {
             if (level == AlarmLevel.RED) {
                 Toolkit.getDefaultToolkit().beep();
@@ -90,6 +115,57 @@ public class AlarmManager {
             );
         });
     }
+
+
+/*
+    public void applyUIAndNotify(VitalSign v, JComponent panel) {
+        AlarmLevel level = v.getAlarmLevel();
+        String key = v.getClass().getSimpleName();
+
+        // ✅ Always reflect GREEN on the panel (so colours reset properly)
+        if (level == AlarmLevel.GREEN) {
+            setPanelColour(panel, level);     // <-- put this back for GREEN
+            lastLevel.put(key, level);
+            closeVitalDialog(key);
+            return;
+        }
+
+        // De-dupe repeated same-level alarms
+        AlarmLevel previous = lastLevel.get(key);
+        if (previous != null && previous == level) {
+            return;
+        }
+        lastLevel.put(key, level);
+
+        Alarm alarm = new Alarm(v);
+
+        // Email logic still allowed even on login
+        if (level == AlarmLevel.RED && emailService != null) {
+            // ... your cooldown code unchanged ...
+        }
+
+        // 🔒 Gate only the popup UI (login screen)
+        if (!Alarm.isUiAlarmPopupsEnabled()) {
+            return;
+        }
+
+        // ✅ After login, update panel colour for non-green too
+        setPanelColour(panel, level);
+
+        SwingUtilities.invokeLater(() -> {
+            if (level == AlarmLevel.RED) Toolkit.getDefaultToolkit().beep();
+
+            showOrUpdateVitalDialog(
+                    key,
+                    panel,
+                    "ALARM - " + key + " (" + level + ")",
+                    alarm.getMessage(),
+                    level
+            );
+        });
+    }
+
+*/
 
     private void showOrUpdateVitalDialog(String key, Component parent, String title, String message, AlarmLevel level) {
 
@@ -107,7 +183,10 @@ public class AlarmManager {
         }
 
         //small toast dialog
-        JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent));
+        //JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(parent));
+        Window owner = SwingUtilities.getWindowAncestor(parent);
+        JDialog dialog = new JDialog(owner != null ? owner : JOptionPane.getRootFrame());
+
         dialog.setUndecorated(true);         //no big frame
         dialog.setAlwaysOnTop(true);
         dialog.setModal(false);
@@ -133,7 +212,7 @@ public class AlarmManager {
 
         vitalDialogs.put(key, dialog);
 
-        //optional disapper 2s
+        //optional disappear 2s
         //new javax.swing.Timer(2000, e -> closeVitalDialog(key)) {{
         //setRepeats(false);
         // start();
@@ -151,12 +230,15 @@ public class AlarmManager {
 
             dialog.setLocation(x, y);
         } catch (IllegalComponentStateException ignored) {
+            Window w = SwingUtilities.getWindowAncestor(parent);
+            if (w != null) dialog.setLocationRelativeTo(w);
+            else dialog.setLocationRelativeTo(null);
 
         }
     }
 
     private String toHtmlSmall(String msg) {
-        //changfe the line auto
+        //change the line auto
         return "<html><div style='width:220px;'>" + msg.replace("\n", "<br>") + "</div></html>";
     }
 

@@ -36,7 +36,7 @@ public class PatientDetails extends JPanel {
         try {
             URL url = new URL("https://cdn-icons-png.flaticon.com/512/149/149071.png");
             ImageIcon icon = new ImageIcon(url);
-            Image scaled = icon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+            Image scaled = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
             iconLabel = new JLabel(new ImageIcon(scaled));
         }
         catch (Exception e) {
@@ -46,17 +46,17 @@ public class PatientDetails extends JPanel {
         leftPanel.add(iconLabel);
 
         //Centre Panel
-        name = new JLabel("Name: "+ patient.getName());
-        id = new JLabel("Patient ID: " + patient.getId());
-        age = new JLabel("Age: " + patient.getAge());
+        name = new JLabel("<html><b>Name:</b> " + patient.getName() + "</html>");
+        id = new JLabel("<html><b>Patient ID:</b> " + patient.getId() + "</html>");
+        age = new JLabel("<html><b>Age:</b> " + patient.getAge() + "</html>");
 
         centerPanel.add(name);
         centerPanel.add(id);
         centerPanel.add(age);
 
         //Right Panel
-        location = new JLabel("Location: " + patient.getLocation());
-        contact = new JLabel("Contact: " + patient.getContact());
+        location = new JLabel("<html><b>Location:</b> " + patient.getLocation());
+        contact = new JLabel("<html><b>Contact:</b> " + patient.getContact());
 
         // Permanent record download button (REQUIRED)
         permBtn = new JButton("Download Permanent Record");
