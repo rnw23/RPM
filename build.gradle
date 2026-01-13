@@ -7,6 +7,14 @@ application {
     mainClass='Main'
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass.get()
+        )
+    }
+}
+
 group = 'org.example'
 version = '1.0-SNAPSHOT'
 
