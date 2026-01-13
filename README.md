@@ -13,7 +13,7 @@ User Guide – How to Use the RPM App
 After login, the system starts automatically.
 You will see:
 
-	•	A patient name
+	•	Selected patient name and details
 	•	Their vital signs (temperature, heart rate, respiration, blood pressure, ECG)
 	•	Each panel shows real-time data
 
@@ -78,7 +78,7 @@ Next to the email settings is a Window slider.
 
 	•	Drag the slider left or right
 	•	This changes how many seconds of data are shown in each chart
-	•	Smaller window = zoomed-in view
+	•	Smaller window = more zoomed-in view
 	•	Larger window = longer history view
 
 ----
