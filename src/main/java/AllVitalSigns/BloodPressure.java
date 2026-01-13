@@ -28,7 +28,7 @@ public class BloodPressure extends VitalSign{
         if (value < 90 || value > 220)
             return AlarmLevel.RED;
 
-        if ((value >= 140 && value < 220) || (value > 90 && value <= 100))
+        if ((value > 140 && value <= 220) || (value >= 90 && value < 100))
             return AlarmLevel.AMBER;
 
         return AlarmLevel.GREEN;
