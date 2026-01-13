@@ -34,7 +34,6 @@ public class App extends JFrame {
         setContentPane(cards);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        //setSize(1100, 900);
         //setLocationRelativeTo(null);
 
         cardLayout.show(cards, "LOGIN");

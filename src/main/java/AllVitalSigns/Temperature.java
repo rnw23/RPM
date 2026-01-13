@@ -17,7 +17,7 @@ public class Temperature extends VitalSign {
      * Evaluates alarm level
      * GREEN: 36-38°C
      * AMBER: 35-36 or 38-39°C
-     * RED: <35 or >39°C
+     * RED: <36 or >38°C
      */
     @Override
     public AlarmLevel getAlarmLevel() {
