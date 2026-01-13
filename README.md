@@ -1,6 +1,7 @@
 User Guide – How to Use the RPM App
 ----
 1.Login
+
 	•	Open the app
 	•	Username: admin
 	•	Password: 1234
@@ -8,6 +9,7 @@ User Guide – How to Use the RPM App
 
 ----
 2.Main Screen (Dashboard)
+
 After login, the system starts automatically.
 You will see:
 	•	A patient name
@@ -16,6 +18,7 @@ You will see:
 
 ----
 3.Alarm Colours
+
 Each vital sign panel uses colour to show risk level:
 	•	Green = Normal
 	•	Amber = Warning
@@ -27,12 +30,14 @@ For RED alarms:
 
 ----
 4.Switch Between Patients
+
 At the top-left, there is a patient selector (dropdown box).
 	•	Click a patient name
 	•	The dashboard updates to show that patient’s data
 
 ----
 5.Heartbeat Sound
+
 Under the Heart Rate panel, there is a button:
 	•	Heartbeat Sound OFF → click to turn sound ON
 	•	When it shows Heartbeat Sound ON, you will hear heartbeat sounds
@@ -41,6 +46,7 @@ Under the Heart Rate panel, there is a button:
 ----
 
 6.Email Alert Setup
+
 At the top of the screen you will see:
 	•	Alert To → the email that will receive alerts
 	•	Sender → the Gmail address that sends alerts
@@ -58,6 +64,7 @@ Steps:
 ----
 
 7.Time Window Slider
+
 Next to the email settings is a Window slider.
 	•	Drag the slider left or right
 	•	This changes how many seconds of data are shown in each chart
@@ -67,6 +74,7 @@ Next to the email settings is a Window slider.
 ----
 
 8.Daily Report
+
 At the right top, you can generate a Daily Report:
 	•	Click Download a permanent record
 	•	Download a permanent record (report file)
