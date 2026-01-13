@@ -44,4 +44,3 @@ class VitalSignsGeneratorAbnormalTest {
                     "Heart rate did not update over time");
         }
     }
-    
