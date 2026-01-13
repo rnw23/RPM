@@ -98,11 +98,11 @@ public class UI extends JPanel {
 
         // ---- email settings ----
         selectorPanel.add(new JLabel("Alert To: "));
-        JTextField toField = new JTextField("your@outlook.com", 18);
+        JTextField toField = new JTextField("your@email.com", 18);
         selectorPanel.add(toField);
 
         selectorPanel.add(new JLabel("Sender: "));
-        JTextField senderField = new JTextField("your@outlook.com", 18);
+        JTextField senderField = new JTextField("your@gmail.com", 18);
         selectorPanel.add(senderField);
 
         selectorPanel.add(new JLabel("AppPwd: "));
