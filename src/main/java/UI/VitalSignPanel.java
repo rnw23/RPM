@@ -10,11 +10,11 @@ import AllVitalSigns.VitalSign;
  */
 public class VitalSignPanel extends JPanel {
 
-    private List<? extends VitalSign> data; // List of vital sign data points to display
-    private int maxPoints = 30; // Maximum number of points to display
-    private final int PAD = 40;  // Padding around the chart edges
+    private List<? extends VitalSign> data; // vital sign data points to display
+    private int maxPoints = 30; // maximum points to display
+    private final int PAD = 40;  // padding around chart edges
 
-    // Optional fixed min/max values for the y-axis
+    // optional fixed min/max values for the y-axis
     private Double fixedMin = null;
     private Double fixedMax = null;
 
