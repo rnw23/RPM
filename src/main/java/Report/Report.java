@@ -5,6 +5,12 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+/**
+ * Abstract base class for Excel-based reporting.
+ * Create a new Excel Workbook and initialise 2 standard sheets used by the system: Vital Signs Average per Minute & Abnormal Events
+ * Create consistent header rows for both sheets.
+ * Keeps Excel sheet structure consistent across different report types
+ */
 public abstract class Report {
 
     protected static final String SHEET_AVG = "Vital Signs Average per Minute";
@@ -21,6 +27,7 @@ public abstract class Report {
         createHeaders();
     }
 
+    // Creates header rows for both report sheets.
     protected void createHeaders() {
         // Sheet 1: Vital Signs Average per Minute
         Row h = avgSheet.createRow(0);
@@ -40,7 +47,7 @@ public abstract class Report {
     }
 
     protected static int nextRowIndex(Sheet sheet) {
-        // returns next write position (safe even if only header exists)
+        // Returns next write position (safe even if only header exists)
         int last = sheet.getLastRowNum();
         if (last == 0 && sheet.getRow(0) == null) return 0;
         return last + 1;
