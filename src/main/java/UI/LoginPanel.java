@@ -127,7 +127,6 @@ public class LoginPanel extends JPanel {
 
             boolean ok = AuthService.check(username, password);
 
-            // good practice: clear password char[]
             Arrays.fill(password, '\0');
 
             if (ok) {
