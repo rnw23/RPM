@@ -1,14 +1,19 @@
 User Guide – How to Use the RPM App
 ----
-1.Login
+1. Run the application
+   	•	Requirements: Java 17 installed
+	•	From the project root directory, run:
+		./gradlew clean installDist
+		./build/install/RPM/bin/RPM
+   
+2.Login
 
-	•	Open the app
 	•	Username: admin
 	•	Password: 1234
 	•	Click Login
 
 ----
-2.Main Screen (Dashboard)
+3.Main Screen (Dashboard)
 
 After login, the system starts automatically.
 You will see:
@@ -18,7 +23,7 @@ You will see:
 	•	Each panel shows real-time data
 
 ----
-3.Alarm Colours
+4.Alarm Colours
 
 Each vital sign panel uses colour to show risk level:
 
@@ -33,7 +38,7 @@ For RED alarms:
 	•	An email is sent (if email is configured)
 
 ----
-4.Switch Between Patients
+5.Switch Between Patients
 
 At the top-left, there is a patient selector (dropdown box).
 
@@ -41,7 +46,7 @@ At the top-left, there is a patient selector (dropdown box).
 	•	The dashboard updates to show that patient’s data
 
 ----
-5.Heartbeat Sound
+6.Heartbeat Sound
 
 Under the Heart Rate panel, there is a button:
 
@@ -51,7 +56,7 @@ Under the Heart Rate panel, there is a button:
 
 ----
 
-6.Email Alert Setup
+7.Email Alert Setup
 
 At the top of the screen you will see:
 
@@ -72,7 +77,7 @@ Steps:
 
 ----
 
-7.Time Window Slider
+8.Time Window Slider
 
 Next to the email settings is a Window slider.
 
@@ -83,7 +88,7 @@ Next to the email settings is a Window slider.
 
 ----
 
-8.Daily Report
+9.Daily Report
 
 At the right top, you can generate a Daily Report:
 
@@ -91,4 +96,4 @@ At the right top, you can generate a Daily Report:
 	•	Download a permanent record (report file)
 
 ----
-9.End programme
+10.End programme
