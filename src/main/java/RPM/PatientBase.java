@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * PatientBase manages a collection of Patient objects
- * It provides methods to add, access, and search for patients
- * serving as the central database
+ * PatientBase to manage database of Patient objects
+ * methods to add, access, and search for patients
  */
 public class PatientBase {
 

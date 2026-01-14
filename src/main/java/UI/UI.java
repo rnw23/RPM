@@ -15,20 +15,27 @@ import java.time.LocalDate;
 import Alarm.*;
 import RPM.*;
 
+/**
+ * UI panel for the Remote Patient Monitoring system (a JPanel)
+ * features includepatient selection, real-time vital sign visualisation,
+ * alarms, audio heartbeat
+ */
 public class UI extends JPanel {
 
+    //patient + patient selection
     private final PatientBase patients;
     private Patient selectedPatient;
-
+    private PatientDetails patientInfo;
     private JComboBox<String> patientSelector;
+
     private Timer timer;
 
+    //select graph display time window
     private JSlider windowSlider;
     private JLabel windowLabel;
     private int windowSec = 10;
 
-    private PatientDetails patientInfo;
-
+    //vital chart panels
     private VitalSignPanel tempChart;
     private VitalSignPanel hrChart;
     private VitalSignPanel rrChart;
@@ -41,12 +48,15 @@ public class UI extends JPanel {
     private JPanel bloodPressurePanel;
     private JPanel ECGPanel;
 
+    //for heartbeat indicator
     private JToggleButton heartbeatToggle;
     private Timer heartbeatTimer;
 
+    //alarm control
     private final AlarmManager alarmManager = new AlarmManager();
     private boolean isEditingSettings = false;
 
+    //root panel
     private JPanel mainPanel;
 
     public UI(PatientBase patients) {
@@ -56,7 +66,7 @@ public class UI extends JPanel {
 
     public void initialise() {
 
-        selectedPatient = patients.getPatient(0);
+        selectedPatient = patients.getPatient(0); // default to display first patient
         alarmManager.setCurrentPatientName(selectedPatient.getName());
 
         //JFrame frame = new JFrame("Remote Patient Monitor");
@@ -69,6 +79,8 @@ public class UI extends JPanel {
         setLayout(new BorderLayout());
         mainPanel = this; // optional, or remove mainPanel entirely
 
+
+        //top layout --> selector + patient info
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
@@ -80,23 +92,27 @@ public class UI extends JPanel {
         selectorPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
         selectorPanel.setPreferredSize(new Dimension(900, 40));
 
+        //set up vital sign panel
         JPanel vitalSignsPanel = new JPanel(new GridLayout(2, 2));
 
+        //set up ecg panel
         ECGPanel = new JPanel(new BorderLayout());
         ECGPanel.setPreferredSize(new Dimension(900, 150));
 
+        //add all base panel to root panel
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(vitalSignsPanel, BorderLayout.CENTER);
         mainPanel.add(ECGPanel, BorderLayout.SOUTH);
 
-        // ---- patient selector ----
+        //selector --> patient selector, email setting, ns time window slider
+        //  1. patient selector
         patientSelector = new JComboBox<>();
         for (Patient p : patients.getPatients()) patientSelector.addItem(p.getName());
 
         selectorPanel.add(new JLabel("Select Patient: "));
         selectorPanel.add(patientSelector);
 
-        // ---- email settings ----
+        // 2. email settings
         selectorPanel.add(new JLabel("Alert To: "));
         JTextField toField = new JTextField("your@email.com", 18);
         selectorPanel.add(toField);
@@ -109,9 +125,10 @@ public class UI extends JPanel {
         JPasswordField pwdField = new JPasswordField(16);
         selectorPanel.add(pwdField);
 
+
+        //3. time window size selector
         windowLabel = new JLabel("Window: 10s");
         selectorPanel.add(windowLabel);
-
         windowSlider = new JSlider(5, 60, 10);
         windowSlider.setMajorTickSpacing(5);
         windowSlider.setPaintTicks(true);
@@ -121,6 +138,7 @@ public class UI extends JPanel {
             windowSec = windowSlider.getValue();
             windowLabel.setText("Window: " + windowSec + "s");
 
+            //update chart history window
             tempChart.setMaxPoints(windowSec);
             hrChart.setMaxPoints(windowSec);
             rrChart.setMaxPoints(windowSec);
@@ -162,6 +180,8 @@ public class UI extends JPanel {
             JOptionPane.showMessageDialog(UI.this, "Email settings applied.");
         });
 
+
+        //4. daily report
         JButton dailyBtn = new JButton("Generate Daily Report");
         selectorPanel.add(dailyBtn);
 
@@ -215,7 +235,7 @@ public class UI extends JPanel {
         patientInfo = new PatientDetails(selectedPatient);
         patientPanel.add(patientInfo);
 
-        // ---- charts ----
+        // 5. vital charts
         bodyTemperaturePanel = new JPanel(new BorderLayout());
         heartRatePanel = new JPanel(new BorderLayout());
         respiratoryRatePanel = new JPanel(new BorderLayout());
@@ -266,6 +286,7 @@ public class UI extends JPanel {
         bpChart.setOpaque(false);
         ecg.setOpaque(false);
 
+        //heartbeat
         heartbeatToggle = new JToggleButton("Heartbeat Sound OFF");
         heartRatePanel.add(heartbeatToggle, BorderLayout.SOUTH);
 
@@ -318,6 +339,7 @@ public class UI extends JPanel {
 
          */
 
+        //switch patient
         patientSelector.addActionListener(e -> {
             int index = patientSelector.getSelectedIndex();
             if (index >= 0) {
@@ -337,19 +359,23 @@ public class UI extends JPanel {
         return mainPanel;
     }
 
+    //1Hz update loop for vitals
     private void startLiveUpdates() {
         timer = new Timer(1000, e -> {
 
+            // update vitals for all patients
             for (Patient p : patients.getPatients()) p.updateVitals();
-
             refreshCharts();
 
+            //update data history
             var tList = selectedPatient.getTemperatureHistory();
             var hrList = selectedPatient.getHeartRateHistory();
             var rrList = selectedPatient.getRespRateHistory();
             var bpList = selectedPatient.getBloodPressureHistory();
             var ecgHist = selectedPatient.getECGHistory();
 
+
+            //alarm is user not editing settings
             if (!isEditingSettings && !tList.isEmpty()) {
                 alarmManager.applyUIAndNotify(tList.get(tList.size() - 1), bodyTemperaturePanel);
             }
@@ -373,12 +399,14 @@ public class UI extends JPanel {
         timer.start();
     }
 
+    //update all charts
     private void refreshCharts() {
         tempChart.updateData(selectedPatient.getTempArr(windowSec));
         hrChart.updateData(selectedPatient.getHrArr(windowSec));
         rrChart.updateData(selectedPatient.getRrArr(windowSec));
         bpChart.updateData(selectedPatient.getBpArr(windowSec));
     }
+
 
     private void startHeartbeat() {
         stopHeartbeat();

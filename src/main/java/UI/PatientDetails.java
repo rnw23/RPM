@@ -7,6 +7,8 @@ import java.net.URL;
 
 import java.nio.file.Path;
 
+/**display patient info, permanant record download button
+ */
 public class PatientDetails extends JPanel {
     private Patient patient;
     private JPanel leftPanel;
@@ -32,7 +34,7 @@ public class PatientDetails extends JPanel {
         rightPanel = new JPanel();
 
 
-        //Left Panel
+        //Left Panel: icon
         try {
             URL url = new URL("https://cdn-icons-png.flaticon.com/512/149/149071.png");
             ImageIcon icon = new ImageIcon(url);
@@ -45,7 +47,7 @@ public class PatientDetails extends JPanel {
 
         leftPanel.add(iconLabel);
 
-        //Centre Panel
+        //Centre Panel: details
         name = new JLabel("<html><b>Name:</b> " + patient.getName() + "</html>");
         id = new JLabel("<html><b>Patient ID:</b> " + patient.getId() + "</html>");
         age = new JLabel("<html><b>Age:</b> " + patient.getAge() + "</html>");
@@ -54,11 +56,11 @@ public class PatientDetails extends JPanel {
         centerPanel.add(id);
         centerPanel.add(age);
 
-        //Right Panel
+        //Right Panel: location, contact
         location = new JLabel("<html><b>Location:</b> " + patient.getLocation());
         contact = new JLabel("<html><b>Contact:</b> " + patient.getContact());
 
-        // Permanent record download button (REQUIRED)
+        // Permanent record download button
         permBtn = new JButton("Download Permanent Record");
         permBtn.addActionListener(e -> exportPermanentRecord());
 
@@ -66,6 +68,7 @@ public class PatientDetails extends JPanel {
         rightPanel.add(contact);
         rightPanel.add(permBtn);
 
+        //subpanel to main panel
         add(leftPanel, BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);
         add(rightPanel, BorderLayout.EAST);
@@ -81,6 +84,8 @@ public class PatientDetails extends JPanel {
 
     }
 
+
+    //export patient permanent record
     private void exportPermanentRecord() {
         try {
             JFileChooser chooser = new JFileChooser();
@@ -98,9 +103,12 @@ public class PatientDetails extends JPanel {
         }
     }
 
+
+    //update display info
     public void updatePatient(Patient newPatient) {
         this.patient = newPatient;
 
+        //refresh label
         name.setText("Name: " + patient.getName());
         id.setText("Patient ID: " + patient.getId());
         age.setText("Age: " + patient.getAge());
