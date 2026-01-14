@@ -3,8 +3,13 @@ package Report;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * MinuteAverage stores averaged vital sign values for a single minute bucket.
+ * Immutable after construction to simplify reporting and reduce accidental mutation when exported to Excel.
+ */
 public class MinuteAverage {
 
+    // Formatted minute timestamp for report display
     private static final DateTimeFormatter MINUTE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -29,26 +34,32 @@ public class MinuteAverage {
         this.avgDiastolic = avgDiastolic;
     }
 
+
     public String getMinuteText() {
         return minute.format(MINUTE_FORMAT);
     }
 
+    // Raw minute timestamp used for data filtering
     public LocalDateTime getMinute() {
         return minute;
     }
 
+    // Rounded, average heart rate
     public long getAvgHeartRate() {
         return Math.round(avgHeartRate);
     }
 
+    // Rounded, average respiratory rate
     public long getAvgRespRate() {
         return Math.round(avgRespRate);
     }
 
+    // Rounded, average temperature
     public long getAvgTemperature() {
         return Math.round(avgTemperature);
     }
 
+    // Rounded, average blood pressure formatted as "SYS/DIA"
     public String getAvgBloodPressure() {
         long sys = Math.round(avgSystolic);
         long dia = Math.round(avgDiastolic);

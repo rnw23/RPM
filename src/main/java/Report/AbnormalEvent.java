@@ -5,6 +5,13 @@ import Alarm.AlarmLevel;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * AbnormalEvent represents an abnormal "episode" for a vital sign.
+ * Start time: when the vital first enters AMBER or RED range
+ * End time: updated while the abnormal condition persists; finalised when it returns to GREEN
+ * Value range: tracks min and max values observed during the episode
+ * Severity level: fixed for the episode (AMBER or RED).
+ */
 public class AbnormalEvent {
 
     private static final DateTimeFormatter FORMAT =
@@ -31,6 +38,7 @@ public class AbnormalEvent {
         this.maxValue = initialValue;
     }
 
+    // Extends the episode window and updates min/max range.
     public void update(LocalDateTime time, double value) {
         this.end = time;
         this.minValue = Math.min(this.minValue, value);
@@ -46,6 +54,7 @@ public class AbnormalEvent {
     public String getVitalType() { return vitalType; }
     public AlarmLevel getLevel() { return level; }
 
+    // Export user-friendly text for min/max range
     public String getValueRangeText() {
         return String.format("%.1f - %.1f", minValue, maxValue);
     }

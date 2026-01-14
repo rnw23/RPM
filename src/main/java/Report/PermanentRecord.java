@@ -6,6 +6,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * PermanentRecord represents a continuously updated, long-term Excel record for a patient.
+ * Maintain a workbook on disk under records/permanentRecord_<PatientName>.xlsx
+ * Allow exporting/copying the permanent record to a user-selected destination
+ */
 public class PermanentRecord extends Report {
 
     private final Path filePath;
@@ -14,7 +19,8 @@ public class PermanentRecord extends Report {
         super();
         ensureRecordsDir();
         this.filePath = Path.of("records", "permanentRecord_" + safe(patientName) + ".xlsx");
-        // create the file on disk immediately
+
+        // Create the file on disk immediately
         saveToDisk();
     }
 
@@ -34,7 +40,7 @@ public class PermanentRecord extends Report {
         return filePath;
     }
 
-    /** Append a single minute average row and persist to disk */
+    // Append a single minute average row and persist to disk
     public synchronized void appendMinuteAverage(MinuteAverage m) {
         int r = nextRowIndex(avgSheet);
         Row row = avgSheet.createRow(r);
@@ -47,7 +53,7 @@ public class PermanentRecord extends Report {
         saveToDisk();
     }
 
-    /** Append a single abnormal event row and persist to disk */
+    // Append a single abnormal event row and persist to disk
     public synchronized void appendAbnormalEvent(AbnormalEvent e) {
         int r = nextRowIndex(abnormalSheet);
         Row row = abnormalSheet.createRow(r);
@@ -60,7 +66,7 @@ public class PermanentRecord extends Report {
         saveToDisk();
     }
 
-    /** Writes the current workbook state to the permanent record file */
+    // Writes the current workbook state to the permanent record file
     private synchronized void saveToDisk() {
         try (FileOutputStream out = new FileOutputStream(filePath.toFile())) {
             workbook.write(out);
@@ -69,10 +75,7 @@ public class PermanentRecord extends Report {
         }
     }
 
-    /**
-     * Export/copy the already-existing permanent record file to a user-chosen location.
-     * (The "download" requirement.)
-     */
+    // Export the permanent record file to a user-chosen location.
     public void copyTo(Path destination) throws IOException {
         Files.copy(filePath, destination, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
