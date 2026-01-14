@@ -10,12 +10,19 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/** manage and display alarms generated from patient vital signs
+ * - UI notification dialogs for abnormal vital signs
+ * - coloring of UI panels based on alarm levels
+ * - email notifications for RED alarms with cooldowns
+ */
 public class AlarmManager {
-
+    // stores the last alarm level to prevent repeated notifications
     private final Map<String, AlarmLevel> lastLevel = new HashMap<>();
+    //pop ups
     private final Map<String, JDialog> vitalDialogs = new HashMap<>();
     private final Map<String, JOptionPane> vitalOptionPanes = new HashMap<>();
 
+    //recipient
     private String recipientEmail = "your@email.com";
     //name of current patient name to be included
     private String currentPatientName = "Unknown";
@@ -41,18 +48,22 @@ public class AlarmManager {
         if (!email.isEmpty()) this.recipientEmail = email;
     }
 
+    //apply alarm level to UI
+    // triggers UI dialogs, sends email notifications if required
     public void applyUIAndNotify(VitalSign v, JComponent panel) {
         AlarmLevel level = v.getAlarmLevel();
         String key = v.getClass().getSimpleName();
 
-        setPanelColour(panel, level);
+        setPanelColour(panel, level); //update UI background colour
 
+        //green level
         if (level == AlarmLevel.GREEN) {
             lastLevel.put(key, level);
             closeVitalDialog(key);
             return;
         }
 
+        //prevent repeat notification
         AlarmLevel previous = lastLevel.get(key);
         if (previous != null && previous == level) {
 
@@ -72,6 +83,7 @@ public class AlarmManager {
 
         Alarm alarm = new Alarm(v);
 
+        //red --> send email
         if (level == AlarmLevel.RED && emailService != null) {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime last = lastEmailSent.get(key);
@@ -87,13 +99,15 @@ public class AlarmManager {
             }
         }
 
+        // only show UI popups if globally enabled
         if (!Alarm.isUiAlarmPopupsEnabled()) {
             return;
         }
 
+        // schedule dialog creation/update on Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
             if (level == AlarmLevel.RED) {
-                Toolkit.getDefaultToolkit().beep();
+                Toolkit.getDefaultToolkit().beep(); //audible red alert
             }
             showOrUpdateVitalDialog(
                     key,
@@ -105,6 +119,7 @@ public class AlarmManager {
         });
     }
 
+    //creates/updates dialog for a vital alarm
     private void showOrUpdateVitalDialog(String key, Component parent, String title, String message, AlarmLevel level) {
 
         // Jdialog exisit but be covered
@@ -174,11 +189,13 @@ public class AlarmManager {
         }
     }
 
+    //format msg as html
     private String toHtmlSmall(String msg) {
         //change the line auto
         return "<html><div style='width:220px;'>" + msg.replace("\n", "<br>") + "</div></html>";
     }
 
+    //position dialog
     private void positionTopRight(JDialog dialog, Window owner, String key) {
         if (owner == null) return;
 
@@ -200,6 +217,7 @@ public class AlarmManager {
         }
     }
 
+    //close dialog at given viral
     private void closeVitalDialog(String key) {
         JDialog dialog = vitalDialogs.get(key);
         if (dialog != null) {
@@ -209,10 +227,12 @@ public class AlarmManager {
         vitalOptionPanes.remove(key);
     }
 
+
     public void closeDialogForVital(String vitalKey) {
         closeVitalDialog(vitalKey);
     }
 
+    //close all active dialogs for shutdown of application
     public void closeAllDialogs() {
         //avoid ConcurrentModification
         for (JDialog d : vitalDialogs.values()) {
@@ -222,6 +242,7 @@ public class AlarmManager {
         vitalOptionPanes.clear();
     }
 
+    //updates background color of a panel
     private void setPanelColour(JComponent panel, AlarmLevel level) {
         Color color = switch (level) {
             case GREEN -> new Color(210, 255, 210);

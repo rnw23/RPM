@@ -3,12 +3,18 @@ package Alarm;
 import AllVitalSigns.VitalSign;
 import java.time.LocalDateTime;
 
+/**
+ * alert event triggered by a patient vital sign
+ * encapsulates vital sign, alarm level, message,timestamp
+ * control UI alarm popups
+ */
+
 public class Alarm {
-    private VitalSign vitalSign;
+    private VitalSign vitalSign; //vital sign associated
     private AlarmLevel alarmLevel;
-    private String message;
-    private LocalDateTime dateTime;
-    private static volatile boolean uiAlarmPopupsEnabled = false;
+    private String message; //message describing the alarm
+    private LocalDateTime dateTime; //timestamp of alarm event
+    private static volatile boolean uiAlarmPopupsEnabled = false; //ensure notification visibility across threads for concurrent alarms
 
     public Alarm(VitalSign vitalSign) {
         this.vitalSign = vitalSign;
@@ -17,6 +23,7 @@ public class Alarm {
         this.message = buildMessage();
     }
 
+    //format message summarising the vital, value, alarm level
     private String buildMessage() {
         return String.format(
                 "| Vital: %s | Value: %.1f | Level: %s |",
@@ -26,6 +33,7 @@ public class Alarm {
         );
     }
 
+    //getters
     public AlarmLevel getAlarmLevel() { return alarmLevel; }
 
     public String getMessage() {
