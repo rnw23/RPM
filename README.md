@@ -1,9 +1,11 @@
 User Guide – How to Use the RPM App
 ----
-1. Run the application
-   	•	Requirements: Java 17 installed
+
+1.Run the application
+
+	•	Requirements: Java 17 installed
 	•	From the project root directory, run:
-		./gradlew clean installDist
+            ./gradlew clean installDist
 		./build/install/RPM/bin/RPM
    
 2.Login
