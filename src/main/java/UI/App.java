@@ -5,6 +5,9 @@ import java.awt.*;
 import RPM.PatientBase;
 import Alarm.Alarm;
 
+/** Reference 2 - developed with assistance from an AI language model (ChatGPT) to
+ * develop login interface and authentication system
+ */
 public class App extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel cards = new JPanel(cardLayout);
