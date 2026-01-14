@@ -11,9 +11,9 @@ import AllVitalSigns.BloodPressure;
  */
 public class BloodPressurePanel extends JPanel {
 
-    private List<BloodPressure> data; // List of BloodPressure data points to display
-    private int maxPoints = 30; // Maximum number of points to display
-    private final int PAD = 40; // Padding around the chart edges
+    private List<BloodPressure> data; // BloodPressure data points to display
+    private int maxPoints = 30; // maximum number of points to display
+    private final int PAD = 40; // padding around the chart edges
 
     public BloodPressurePanel() {
         setPreferredSize(new Dimension(350, 250));
