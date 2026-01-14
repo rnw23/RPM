@@ -29,8 +29,12 @@ Each vital sign panel uses colour to show risk level:
 For RED alarms:
 
 	•	A sound alert is played
-	•	A small popup alert appears on the right cornor
+	•	A small popup alert appears on the right corner
 	•	An email is sent (if email is configured)
+
+For Amber alarms:
+
+    •	A small popup alert appears on the right corner
 
 ----
 4.Switch Between Patients
@@ -83,12 +87,25 @@ Next to the email settings is a Window slider.
 
 ----
 
-8.Daily Report
+8.Permanent Record
 
-At the right top, you can generate a Daily Report:
+In the Patient Details panel, and below the contact, there is a button where you can download a permanent record:
 
-	•	Click Download a permanent record
-	•	Download a permanent record (report file)
+	•	Click "Download Permanent Record"
+	•	Choose the location you want the record to be
+    •	Permanent record is saved in your computer as xlsx.
 
 ----
-9.End programme
+
+9.Daily Report
+
+On the right upper corner, next to the Apply Email button, you can download daily report of a specific patient in a specific date:
+
+	•	Click "Generate Daily Report"
+	•	Enter the patient id
+	•	Enter the date you want to view
+	•	Choose the location you want the record to be
+    •	Daily Report is saved in your computer as xlsx.
+
+----
+10.End programme
